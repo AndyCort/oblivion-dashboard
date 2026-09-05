@@ -1,9 +1,43 @@
 import { useState, useEffect } from 'react';
+import styled from 'styled-components';
 
 interface BackgroundProps {
   url?: string;
   type?: 'image' | 'video';
 }
+
+const BackgroundLayer = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+`;
+
+const BackgroundVideoLayer = styled.video`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+`;
+
+const Overlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.1) 0%, rgba(0, 0, 0, 0.7) 100%);
+  backdrop-filter: saturate(110%);
+  z-index: -1;
+`;
 
 export function Background({ url, type = 'image' }: BackgroundProps) {
   const [currentUrl, setCurrentUrl] = useState<string>(
@@ -17,8 +51,7 @@ export function Background({ url, type = 'image' }: BackgroundProps) {
   return (
     <>
       {type === 'video' ? (
-        <video 
-          className="background-layer"
+        <BackgroundVideoLayer 
           src={currentUrl}
           autoPlay 
           loop 
@@ -26,13 +59,12 @@ export function Background({ url, type = 'image' }: BackgroundProps) {
           playsInline
         />
       ) : (
-        <img 
-          className="background-layer"
+        <BackgroundLayer 
           src={currentUrl}
           alt="background"
         />
       )}
-      <div className="overlay"></div>
+      <Overlay />
     </>
   );
 }

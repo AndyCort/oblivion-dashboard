@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import { Cloud, CloudRain, Sun, CloudLightning, Snowflake } from 'lucide-react';
+import { WidgetBase } from './ui/Shared';
 
 interface WeatherData {
   temp: number;
@@ -7,7 +9,36 @@ interface WeatherData {
   code: number;
 }
 
-export function Weather() {
+const WeatherWidget = styled(WidgetBase)`
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+`;
+
+const WeatherInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const WeatherTemp = styled.div`
+  font-family: 'Outfit', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 200;
+  line-height: 1;
+`;
+
+const WeatherDesc = styled.div`
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-top: 0.5rem;
+  font-weight: 300;
+`;
+
+export function Weather({ className = '' }: { className?: string }) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,31 +105,31 @@ export function Weather() {
   };
 
   const getWeatherIcon = (code: number) => {
-    if (code === 0) return <Sun size={48} />;
-    if (code === 1 || code === 2 || code === 3) return <Cloud size={48} />;
-    if (code >= 51 && code <= 67) return <CloudRain size={48} />;
-    if (code >= 71 && code <= 77) return <Snowflake size={48} />;
-    if (code >= 80 && code <= 82) return <CloudRain size={48} />;
-    if (code >= 85 && code <= 86) return <Snowflake size={48} />;
-    if (code >= 95 && code <= 99) return <CloudLightning size={48} />;
-    return <Cloud size={48} />;
+    if (code === 0) return <Sun size={64} />;
+    if (code === 1 || code === 2 || code === 3) return <Cloud size={64} />;
+    if (code >= 51 && code <= 67) return <CloudRain size={64} />;
+    if (code >= 71 && code <= 77) return <Snowflake size={64} />;
+    if (code >= 80 && code <= 82) return <CloudRain size={64} />;
+    if (code >= 85 && code <= 86) return <Snowflake size={64} />;
+    if (code >= 95 && code <= 99) return <CloudLightning size={64} />;
+    return <Cloud size={64} />;
   };
 
   if (error) {
-    return <div className="widget">{error}</div>;
+    return <WidgetBase className={className}>{error}</WidgetBase>;
   }
 
   if (!weather) {
-    return <div className="widget">Loading weather...</div>;
+    return <WidgetBase className={className}>Loading weather...</WidgetBase>;
   }
 
   return (
-    <div className="widget weather-widget">
+    <WeatherWidget className={className}>
       {getWeatherIcon(weather.code)}
-      <div>
-        <div className="weather-temp">{Math.round(weather.temp)}°C</div>
-        <div className="weather-desc">{weather.description}</div>
-      </div>
-    </div>
+      <WeatherInfo>
+        <WeatherTemp>{Math.round(weather.temp)}°C</WeatherTemp>
+        <WeatherDesc>{weather.description}</WeatherDesc>
+      </WeatherInfo>
+    </WeatherWidget>
   );
 }
