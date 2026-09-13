@@ -1,5 +1,8 @@
 export const GlobalConfig = {
-  siteName: "SorrowLove",
+  siteName: {
+    zh: "哀 情",
+    en: "Sorrow Love",
+  },
   BgUrl: "https://w.wallhaven.cc/full/d8/wallhaven-d8d91l.png",
 };
 export const wConf = {

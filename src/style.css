@@ -1,4 +1,4 @@
-@import url('https://fonts.cdnfonts.com/css/ds-digital');
+@import url("https://fonts.cdnfonts.com/css/ds-digital");
 
 :root {
   --font-size-xl: 6rem;
@@ -7,14 +7,11 @@
   --font-size-sm: 1rem;
   --font-size-xs: 0.85rem;
 
-  /* default */
-  font-family: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --bg: #e9e5e8;
+  --ink: #28252a;
+  --muted: rgba(40, 37, 42, 0.48);
+  --glass: rgba(255, 255, 255, 0.24);
+  --line: rgba(255, 255, 255, 0.48);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -22,26 +19,81 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-
+p,
+span,
+a,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button,
+label,
+li {
+  color: white;
+  mix-blend-mode: difference;
+}
 html,
 body,
 #root {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   overflow: hidden;
-  background: #000;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  color: var(--ink);
+  font-family: "DM Sans", system-ui, sans-serif;
+  background:
+    radial-gradient(
+      circle at 72% 22%,
+      rgba(255, 245, 235, 0.9),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 28% 78%,
+      rgba(215, 205, 225, 0.9),
+      transparent 28%
+    ),
+    linear-gradient(135deg, #eee9e8, #dcd8df);
+  transition: background 1.2s ease;
+}
+
+.ambient-orb {
+  position: fixed;
+  width: 42vw;
+  height: 42vw;
+  max-width: 620px;
+  max-height: 620px;
+  border-radius: 50%;
+  left: 58%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.5),
+    rgba(214, 195, 220, 0.14) 45%,
+    transparent 70%
+  );
+  filter: blur(8px);
+  pointer-events: none;
+  animation: breathe 9s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
 }
