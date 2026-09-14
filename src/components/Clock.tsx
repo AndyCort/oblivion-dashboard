@@ -16,11 +16,12 @@ const ClockWidget = styled(WidgetBase)`
     border-color: transparent;
     box-shadow: none;
   }
+  color: ${({ theme }) => theme.ink};
 `;
 
 const ClockTime = styled.h1`
   font-family: "DS-Digital", sans-serif;
-  font-size: var(--font-size-xl);
+  font-size: ${({ theme }) => theme.fontSizes.xl};
   font-weight: 200;
   letter-spacing: -3px;
   line-height: 1;
@@ -34,7 +35,7 @@ const ClockTime = styled.h1`
 
 const ClockDate = styled.div`
   font-family: "Outfit", sans-serif;
-  font-size: var(--font-size-sm);
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: 300;
   opacity: 0.9;
   margin-top: 0.5rem;

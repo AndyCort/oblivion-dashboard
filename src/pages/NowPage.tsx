@@ -37,7 +37,7 @@ export function NowPage({ isActive }: Props) {
 const GlassPanel = styled.div`
   width: min(1000px, 76vw);
   padding: 42px 48px;
-  border: 1px solid var(--line);
+  border: 1px solid ${({ theme }) => theme.line};
   border-radius: 34px;
   background: linear-gradient(
     135deg,

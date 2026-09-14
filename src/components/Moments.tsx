@@ -174,8 +174,10 @@ const MomentsContainer = styled.div`
 
         a {
           text-decoration: none;
+          color: #ffffff;
+
           &:hover {
-            text-decoration: underline;
+            font-style: bold;
             transition: ease-in-out 0.3s;
           }
         }

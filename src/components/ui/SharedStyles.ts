@@ -52,5 +52,5 @@ export const Ring = styled.div`
 export const RingText = styled.div`
   font-family: "Playfair Display", Georgia, serif;
   font-size: 24px;
-  color: var(--ink);
+  color: ${({ theme }) => theme.ink};
 `;

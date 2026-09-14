@@ -5,41 +5,35 @@ import { NotesPage } from "./pages/NotesPage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { SpacePage } from "./pages/SpacePage";
 import { Sun, Moon, ChevronUp, ChevronDown } from "lucide-react";
-import styled from "styled-components";
+import styled, {
+  useTheme,
+  ThemeProvider as StyledThemeProvider,
+  createGlobalStyle,
+} from "styled-components";
 import { DotButton } from "./components/ui/DotButton";
 import { GlobalConfig } from "./config/GlobalConfig";
 // 标题
 const brand = `${GlobalConfig.siteName.zh} / ${GlobalConfig.siteName.en}`;
 
-// 背景图
-const BgImg = [
-  { name: "bg1", url: "https://w.wallhaven.cc/full/gj/wallhaven-gjyoq7.png" },
-  {
-    name: "bg2",
-    url: "https://images.unsplash.com/photo-1577193647731-2e0c1d04a565",
-  },
-  {
-    name: "bg3",
-    url: "https://w.wallhaven.cc/full/d8/wallhaven-d8d91l.png",
-  },
-  {
-    name: "test",
-    url: "https://images.unsplash.com/photo-1638132035918-90a22beaab3b",
-  },
-];
-
 const pagesList = ["home", "now", "notes", "library", "space"] as const;
 type Page = (typeof pagesList)[number];
 
+const GlobalBodyStyle = createGlobalStyle`
+  body {
+    color: ${({ theme }: any) => theme.ink};
+  }
+`;
+
 function App() {
+  const theme = useTheme() as any;
   // 背景图设置
-  const [currentBg, setCurrentBg] = useState(0);
+  const [currentBg, setCurrentBg] = useState(3);
 
   const [activePage, setActivePage] = useState<Page>("home");
 
   useEffect(() => {
-    document.title = "Personal Space";
-  }, []);
+    document.title = `${GlobalConfig.siteName.zh} - ${activePage}`;
+  }, [activePage]);
 
   const goNextPage = () => {
     const currentIndex = pagesList.indexOf(activePage);
@@ -80,84 +74,91 @@ function App() {
     document.body.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
+  const currentTheme = theme.themes[currentBg];
+  const combinedTheme = {
+    ...currentTheme.colors,
+    fontSizes: theme.fontSizes,
+  };
+
   return (
     <>
-      <Background $bg={BgImg[currentBg].url} />
+      <Background $bg={currentTheme.bgImg} />
       <div className="ambient-orb"></div>
 
-      <Layout>
-        <nav className="nav" aria-label="Page navigation">
-          {pagesList.map((page) => (
-            <DotButton
-              key={page}
-              active={activePage === page}
-              onClick={() => setActivePage(page)}
-              label={page}
-              labelAlign="right"
-            />
-          ))}
-        </nav>
+      <StyledThemeProvider theme={combinedTheme}>
+        <GlobalBodyStyle />
+        <Layout>
+          <nav className="nav" aria-label="Page navigation">
+            {pagesList.map((page) => (
+              <DotButton
+                key={page}
+                active={activePage === page}
+                onClick={() => setActivePage(page)}
+                label={page}
+                labelAlign="right"
+              />
+            ))}
+          </nav>
 
-        <header className="top">
-          <div className="brand">{brand}</div>
-          <div className="top-right">
-            <div className="dark-mode">
-              <button onClick={() => setDarkMode(!darkMode)}>
-                {darkMode ? (
-                  <Sun size={16} strokeWidth={1.5} />
-                ) : (
-                  <Moon size={16} strokeWidth={1.5} />
-                )}
-              </button>
+          <header className="top">
+            <div className="brand">{brand}</div>
+            <div className="top-right">
+              <div className="dark-mode">
+                <button onClick={() => setDarkMode(!darkMode)}>
+                  {darkMode ? (
+                    <Sun size={16} strokeWidth={1.5} />
+                  ) : (
+                    <Moon size={16} strokeWidth={1.5} />
+                  )}
+                </button>
+              </div>
             </div>
-            <div className="status">
-              <strong>Online</strong> · Clear
+          </header>
+
+          <main className="pages">
+            <HomePage isActive={activePage === "home"} />
+            <NowPage isActive={activePage === "now"} />
+            <NotesPage isActive={activePage === "notes"} />
+            <LibraryPage isActive={activePage === "library"} />
+            <SpacePage isActive={activePage === "space"} />
+          </main>
+
+          <button
+            className="nav-arrow prev"
+            onClick={goPrevPage}
+            aria-label="Previous page"
+          >
+            <ChevronUp size={24} strokeWidth={1.5} />
+          </button>
+          <button
+            className="nav-arrow next"
+            onClick={goNextPage}
+            aria-label="Next page"
+          >
+            <ChevronDown size={24} strokeWidth={1.5} />
+          </button>
+
+          <div className="bottom-status">
+            <div>
+              <span className="status-dot"></span>
+              <strong>Online</strong>
             </div>
+            <div>{timeStr}</div>
           </div>
-        </header>
-
-        <main className="pages">
-          <HomePage isActive={activePage === "home"} />
-          <NowPage isActive={activePage === "now"} />
-          <NotesPage isActive={activePage === "notes"} />
-          <LibraryPage isActive={activePage === "library"} />
-          <SpacePage isActive={activePage === "space"} />
-        </main>
-
-        <button
-          className="nav-arrow prev"
-          onClick={goPrevPage}
-          aria-label="Previous page"
-        >
-          <ChevronUp size={24} strokeWidth={1.5} />
-        </button>
-        <button
-          className="nav-arrow next"
-          onClick={goNextPage}
-          aria-label="Next page"
-        >
-          <ChevronDown size={24} strokeWidth={1.5} />
-        </button>
-
-        <div className="bottom-status">
-          <div>
-            <span className="status-dot"></span>Personal space · online
-          </div>
-          <div>{timeStr}</div>
-        </div>
-        {/* */}
-        <Dots>
-          {BgImg.map((_, index) => (
-            <DotButton
-              key={index}
-              active={currentBg === index}
-              onClick={() => setCurrentBg(index)}
-              label={BgImg[index].name}
-              labelAlign="left"
-            />
-          ))}
-        </Dots>
-      </Layout>
+          {/* */}
+          <Dots>
+            {theme.themes.map((_: any, index: number) => (
+              <DotButton
+                key={index}
+                active={currentBg === index}
+                onClick={() => setCurrentBg(index)}
+                label={theme.themes[index].name}
+                labelAlign="left"
+              />
+            ))}
+          </Dots>
+        </Layout>
+      </StyledThemeProvider>
     </>
   );
 }
@@ -227,9 +228,10 @@ const Layout = styled.div`
       display: flex;
       align-items: center;
       gap: 13px;
-      color: var(--muted);
+
       font-size: 12px;
       .dark-mode {
+        display: flex;
         align-items: center;
         justify-content: center;
         button {
@@ -237,10 +239,9 @@ const Layout = styled.div`
           height: 36px;
           border-radius: 50%;
           background: transparent;
-          border: 1px solid var(--muted);
+          border: none;
+          color: ${({ theme }) => theme.ink};
         }
-      }
-      .status {
       }
     }
   }
@@ -284,13 +285,13 @@ const Layout = styled.div`
     justify-content: center;
     border: none;
     background: transparent;
-    color: var(--muted);
+    color: ${({ theme }) => theme.muted};
     cursor: pointer;
     transition: 0.3s ease;
     transform: translateX(-50%);
 
     &:hover {
-      color: var(--ink);
+      color: ${({ theme }) => theme.ink};
       transform: translateX(-50%) scale(1.1);
     }
 
@@ -313,7 +314,7 @@ const Layout = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: end;
-    color: var(--muted);
+    color: ${({ theme }) => theme.muted};
     font-size: 9px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -354,7 +355,7 @@ const Layout = styled.div`
     backdrop-filter: none !important;
   }
   .ambient-component * {
-    color: var(--ink) !important;
+    color: ${({ theme }) => theme.ink} !important;
     text-shadow: none !important;
   }
 `;

@@ -1,18 +1,6 @@
 @import url("https://fonts.cdnfonts.com/css/ds-digital");
 
 :root {
-  --font-size-xl: 6rem;
-  --font-size-lg: 2.5rem;
-  --font-size-md: 1.5rem;
-  --font-size-sm: 1rem;
-  --font-size-xs: 0.85rem;
-
-  --bg: #e9e5e8;
-  --ink: #28252a;
-  --muted: rgba(40, 37, 42, 0.48);
-  --glass: rgba(255, 255, 255, 0.24);
-  --line: rgba(255, 255, 255, 0.48);
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -24,7 +12,7 @@
   margin: 0;
   padding: 0;
 }
-p,
+/*p,
 span,
 a,
 h1,
@@ -39,6 +27,7 @@ li {
   color: white;
   mix-blend-mode: difference;
 }
+  */
 html,
 body,
 #root {
@@ -49,7 +38,6 @@ body,
 }
 
 body {
-  color: var(--ink);
   font-family: "DM Sans", system-ui, sans-serif;
   background:
     radial-gradient(

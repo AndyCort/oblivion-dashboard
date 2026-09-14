@@ -69,7 +69,7 @@ const BookCard = styled.div`
 
   .book-category {
     font-size: 9px;
-    color: var(--muted);
+    color: ${({ theme }) => theme.muted};
     text-transform: uppercase;
     letter-spacing: 0.2em;
   }
@@ -82,7 +82,7 @@ const BookCard = styled.div`
 
   .book-author {
     font-size: 10px;
-    color: var(--muted);
+    color: ${({ theme }) => theme.muted};
     letter-spacing: 0.1em;
   }
 

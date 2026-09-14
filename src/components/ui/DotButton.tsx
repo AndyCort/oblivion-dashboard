@@ -63,7 +63,7 @@ const StyledDot = styled.button<{ $active: boolean }>`
     font-size: 10px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: ${({ theme }) => theme.muted};
     transition: 0.3s ease;
     pointer-events: none;
   }

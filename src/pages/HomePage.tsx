@@ -86,7 +86,7 @@ const HomeContent = styled.div`
     font-size: 11px;
     letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: ${({ theme }) => theme.muted};
     margin-bottom: 22px;
   }
   .clock {
@@ -97,7 +97,11 @@ const HomeContent = styled.div`
   }
   .date {
     margin-top: 27px;
-    font-family: "Playfair Display", Georgia, serif;
+    font-family:
+      EB Garamond,
+      "Playfair Display",
+      Georgia,
+      serif;
     font-size: clamp(24px, 3vw, 43px);
     letter-spacing: -0.02em;
   }
@@ -106,14 +110,15 @@ const HomeContent = styled.div`
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: ${({ theme }) => theme.muted};
   }
   .quote {
     position: absolute;
     right: 0;
     bottom: 4px;
     width: 30vw;
-    font-family: "Playfair Display", Georgia, serif;
+    font-family: "EB Garamond", Georgia, serif;
+    font-style: italic;
     font-size: 18px;
     line-height: 1.55;
 
@@ -131,6 +136,6 @@ const HomeContent = styled.div`
     font-size: 9px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: ${({ theme }) => theme.muted};
   }
 `;
