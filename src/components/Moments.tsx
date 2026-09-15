@@ -9,9 +9,11 @@ interface MomentsProps {
 const author = "Andy";
 const size = 12;
 export default function Moments({ moments }: MomentsProps) {
+  const sortedMoments = [...moments].sort((a, b) => b.time - a.time);
+
   return (
     <MomentsContainer>
-      {moments.map((moment, index) => (
+      {sortedMoments.map((moment, index) => (
         <article key={index}>
           <header>
             <div className="avatar">

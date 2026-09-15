@@ -55,4 +55,17 @@ export const moments: Moment[] = [
       url: "https://example.com/music",
     },
   },
+
+  {
+    time: 1789445239000,
+    content: "好的结果也可以是一种诅咒，而坏的结果也许是一种缓冲。",
+    media: [],
+    tags: ["日常", "随想"],
+    location: "Estonia",
+    music: {
+      title: "Sorrow Love",
+      artist: "Someone",
+      url: "https://example.com/music",
+    },
+  },
 ];

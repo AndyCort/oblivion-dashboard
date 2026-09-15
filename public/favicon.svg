@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
     <linearGradient id="moonGrad" x1="20%" y1="90%" x2="80%" y2="10%">
-      <stop offset="0%" stop-color="#fce4c8"/>
-      <stop offset="50%" stop-color="#efeaf4"/>
-      <stop offset="100%" stop-color="#b5b6d8"/>
+      <stop offset="0%" stop-color="#FA9C7A"/>
+      <stop offset="100%" stop-color="#9E98E5"/>
     </linearGradient>
-    <mask id="moonMask">
-      <rect width="100" height="100" fill="white" />
-      <circle cx="60" cy="45" r="38" fill="black" />
-    </mask>
   </defs>
-  <circle cx="45" cy="50" r="40" fill="url(#moonGrad)" mask="url(#moonMask)"/>
+  
+  <!-- Enlarged moon path filling 90% of the viewBox -->
+  <path d="M 75 5 
+           A 45 45 0 0 0 75 95 
+           A 60 60 0 0 1 75 5 Z" 
+        fill="url(#moonGrad)" />
 </svg>

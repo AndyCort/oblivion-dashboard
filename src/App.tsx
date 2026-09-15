@@ -15,7 +15,7 @@ import { GlobalConfig } from "./config/GlobalConfig";
 // 标题
 const brand = `${GlobalConfig.siteName.zh} / ${GlobalConfig.siteName.en}`;
 
-const pagesList = ["home", "now", "notes", "library", "space"] as const;
+const pagesList = ["home", "now", "notes", "library", "moments"] as const;
 type Page = (typeof pagesList)[number];
 
 const GlobalBodyStyle = createGlobalStyle`
@@ -120,7 +120,7 @@ function App() {
             <NowPage isActive={activePage === "now"} />
             <NotesPage isActive={activePage === "notes"} />
             <LibraryPage isActive={activePage === "library"} />
-            <SpacePage isActive={activePage === "space"} />
+            <SpacePage isActive={activePage === "moments"} />
           </main>
 
           <button
