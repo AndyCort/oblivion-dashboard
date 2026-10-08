@@ -62,7 +62,7 @@ export const moments: Moment[] = [
     content: "好的结果也可以是一种诅咒，而坏的结果也许是一种缓冲。",
     media: [],
     tags: ["日常", "随想"],
-    location: "Estonia",
+    location: "Elysium",
     music: {
       title: "Sorrow Love",
       artist: "Someone",
@@ -74,7 +74,7 @@ export const moments: Moment[] = [
     content: "我从来都不是为了和谁在一起\n我想要的是你能真心实意地告诉我\n“我曾爱你”\n“我依然爱你”\n “我爱你”",
     media: [],
     tags: ["日常", "随想"],
-    location: "天府",
+    location: "Elysium",
     music: {
       title: "Sorrow Love",
       artist: "Someone",

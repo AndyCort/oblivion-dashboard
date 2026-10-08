@@ -114,7 +114,7 @@ const MomentsContainer = styled.div`
     -webkit-backdrop-filter: blur(12px);
     padding: 20px;
     gap: 20px;
-    font-family: "LXGW WenKai TC";
+
     header {
       display: flex;
       gap: 10px;
@@ -145,6 +145,7 @@ const MomentsContainer = styled.div`
       margin: 20px 0;
       white-space: pre-line;
       line-height: 175%;
+      font-family: "LXGW WenKai TC";
     }
 
     .media-container {
@@ -166,6 +167,7 @@ const MomentsContainer = styled.div`
       display: flex;
       gap: 16px;
       margin: 16px 0;
+      font-family: "LXGW WenKai TC";
       span {
         color: oklch(0.8 0.1 263);
       }
@@ -175,8 +177,8 @@ const MomentsContainer = styled.div`
       align-items: center;
       gap: 4px;
       margin: 8px 0;
-
       font-size: 12px;
+      font-family: "LXGW WenKai TC";
     }
 
     footer {
@@ -185,6 +187,7 @@ const MomentsContainer = styled.div`
       justify-content: space-between;
       align-items: center;
       gap: 10px;
+
       span {
         display: flex;
         align-items: center;
