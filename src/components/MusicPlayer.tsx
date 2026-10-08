@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
 import { WidgetBase } from "./ui/Shared";
 import { wConf } from "../config/GlobalConfig";
+import { useMusic } from "../contexts/MusicContext";
 
 const MusicWidget = styled(WidgetBase)`
   flex-direction: row;
@@ -75,27 +75,19 @@ const ControlButton = styled.button<{ $opacity?: number }>`
 `;
 
 export function MusicPlayer({ className = "" }: { className?: string }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  // Fake progress bar
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setProgress((p) => (p >= 100 ? 0 : p + 0.5));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
+  const { track, isPlaying, progress, togglePlay } = useMusic();
+
+  const title = track?.title || "Sorrow & Light";
+  const artist = track?.artist || "Oblivion Soundtrack";
+  const cover = track?.cover || wConf.MusicPlayer.cover;
 
   return (
     <MusicWidget className={className}>
-      <MusicCover src={wConf.MusicPlayer.cover} alt="Album Art" />
+      <MusicCover src={cover} alt="Album Art" />
       <MusicInfo>
-        <MusicTitle>Sorrow & Light</MusicTitle>
-        <MusicArtist>Oblivion Soundtrack</MusicArtist>
+        <MusicTitle>{title}</MusicTitle>
+        <MusicArtist>{artist}</MusicArtist>
 
-        {/* Fake Progress Bar */}
         <ProgressBarBackground>
           <ProgressBarFill $progress={progress} />
         </ProgressBarBackground>
@@ -105,7 +97,7 @@ export function MusicPlayer({ className = "" }: { className?: string }) {
             <SkipBack size={wConf.MusicPlayer.size} />
           </ControlButton>
 
-          <ControlButton onClick={() => setIsPlaying(!isPlaying)}>
+          <ControlButton onClick={togglePlay}>
             {isPlaying ? (
               <Pause size={wConf.MusicPlayer.size} />
             ) : (

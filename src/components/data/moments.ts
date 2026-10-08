@@ -44,8 +44,9 @@ export const moments: Moment[] = [
 
   {
     time: 1789110240000,
-    content:
-      "如果本就走在与众不同的道路，那就不该期望自己会有什么传统意义上、或是流行文化中的那种功成名就。",
+    content: `如果本就走在与众不同的道路
+那就不该期望自己会有什么传统意义上、或是流行文化中的那种功成名就。
+    `,
     media: [],
     tags: ["日常", "随想"],
     location: "Toyko",
@@ -62,6 +63,22 @@ export const moments: Moment[] = [
     media: [],
     tags: ["日常", "随想"],
     location: "Estonia",
+    music: {
+      title: "Sorrow Love",
+      artist: "Someone",
+      url: "https://example.com/music",
+    },
+  },
+  {
+    time: 1791400876000,
+    content: `我从来都不是为了和谁在一起
+      我想要的是你能真心实意地告诉我
+      “我曾爱你”
+      “我依然爱你”
+      “我爱你”`,
+    media: [],
+    tags: ["日常", "随想"],
+    location: "天府",
     music: {
       title: "Sorrow Love",
       artist: "Someone",

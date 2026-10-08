@@ -1,6 +1,5 @@
 import styled from "styled-components";
 
-import { MusicPlayer } from "../components/MusicPlayer";
 import { Weather } from "../components/Weather";
 
 interface Props {
@@ -26,7 +25,6 @@ export function NowPage({ isActive }: Props) {
             flexWrap: "wrap",
           }}
         >
-          <MusicPlayer className="ambient-component" />
           <Weather className="ambient-component" />
         </div>
       </GlassPanel>

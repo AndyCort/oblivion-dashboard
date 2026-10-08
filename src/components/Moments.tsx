@@ -2,6 +2,7 @@ import styled from "styled-components";
 import type { Moment } from "./data/moments";
 import { MapPin, Music2 } from "lucide-react";
 import { formatTime } from "./utils/formatTime";
+import { useMusic } from "../contexts/MusicContext";
 
 interface MomentsProps {
   moments: Moment[];
@@ -9,6 +10,7 @@ interface MomentsProps {
 const author = "Andy";
 const size = 12;
 export default function Moments({ moments }: MomentsProps) {
+  const { playTrack } = useMusic();
   const sortedMoments = [...moments].sort((a, b) => b.time - a.time);
 
   return (
@@ -69,7 +71,19 @@ export default function Moments({ moments }: MomentsProps) {
             {/* 右边：音乐等 */}
             {moment.music && (
               <span>
-                <a href={moment.music.url}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (moment.music) {
+                      playTrack({
+                        title: moment.music.title,
+                        artist: moment.music.artist,
+                        url: moment.music.url,
+                      });
+                    }
+                  }}
+                >
                   <Music2 size={size} /> {moment.music.title} -{" "}
                   {moment.music.artist}
                 </a>
@@ -129,6 +143,8 @@ const MomentsContainer = styled.div`
 
     .text-container {
       margin: 20px 0;
+      white-space: pre-line;
+      line-height: 175%;
     }
 
     .media-container {

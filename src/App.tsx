@@ -12,6 +12,8 @@ import styled, {
 } from "styled-components";
 import { DotButton } from "./components/ui/DotButton";
 import { GlobalConfig } from "./config/GlobalConfig";
+import { MusicProvider } from "./contexts/MusicContext";
+import { MusicPlayer } from "./components/MusicPlayer";
 // 标题
 const brand = `${GlobalConfig.siteName.zh} / ${GlobalConfig.siteName.en}`;
 
@@ -85,80 +87,85 @@ function App() {
       <Background $bg={currentTheme.bgImg} />
       <div className="ambient-orb"></div>
 
-      <StyledThemeProvider theme={combinedTheme}>
-        <GlobalBodyStyle />
-        <Layout>
-          <nav className="nav" aria-label="Page navigation">
-            {pagesList.map((page) => (
-              <DotButton
-                key={page}
-                active={activePage === page}
-                onClick={() => setActivePage(page)}
-                label={page}
-                labelAlign="right"
-              />
-            ))}
-          </nav>
+      <MusicProvider>
+        <StyledThemeProvider theme={combinedTheme}>
+          <GlobalBodyStyle />
+          <Layout>
+            <nav className="nav" aria-label="Page navigation">
+              {pagesList.map((page) => (
+                <DotButton
+                  key={page}
+                  active={activePage === page}
+                  onClick={() => setActivePage(page)}
+                  label={page}
+                  labelAlign="right"
+                />
+              ))}
+            </nav>
 
-          <header className="top">
-            <div className="brand">{brand}</div>
-            <div className="top-right">
-              <div className="dark-mode">
-                <button onClick={() => setDarkMode(!darkMode)}>
-                  {darkMode ? (
-                    <Sun size={16} strokeWidth={1.5} />
-                  ) : (
-                    <Moon size={16} strokeWidth={1.5} />
-                  )}
-                </button>
+            <header className="top">
+              <div className="brand">{brand}</div>
+              <div className="top-right">
+                <div className="dark-mode">
+                  <button onClick={() => setDarkMode(!darkMode)}>
+                    {darkMode ? (
+                      <Sun size={16} strokeWidth={1.5} />
+                    ) : (
+                      <Moon size={16} strokeWidth={1.5} />
+                    )}
+                  </button>
+                </div>
               </div>
+            </header>
+
+            <main className="pages">
+              <HomePage isActive={activePage === "home"} />
+              <NowPage isActive={activePage === "now"} />
+              <NotesPage isActive={activePage === "notes"} />
+              <LibraryPage isActive={activePage === "library"} />
+              <SpacePage isActive={activePage === "moments"} />
+            </main>
+
+            <button
+              className="nav-arrow prev"
+              onClick={goPrevPage}
+              aria-label="Previous page"
+            >
+              <ChevronUp size={24} strokeWidth={1.5} />
+            </button>
+            <button
+              className="nav-arrow next"
+              onClick={goNextPage}
+              aria-label="Next page"
+            >
+              <ChevronDown size={24} strokeWidth={1.5} />
+            </button>
+
+            <div className="bottom-status">
+              <div>
+                <span className="status-dot"></span>
+                <strong>Online</strong>
+              </div>
+              <div>{timeStr}</div>
             </div>
-          </header>
+            
+            <MusicPlayer className="global-player" />
 
-          <main className="pages">
-            <HomePage isActive={activePage === "home"} />
-            <NowPage isActive={activePage === "now"} />
-            <NotesPage isActive={activePage === "notes"} />
-            <LibraryPage isActive={activePage === "library"} />
-            <SpacePage isActive={activePage === "moments"} />
-          </main>
-
-          <button
-            className="nav-arrow prev"
-            onClick={goPrevPage}
-            aria-label="Previous page"
-          >
-            <ChevronUp size={24} strokeWidth={1.5} />
-          </button>
-          <button
-            className="nav-arrow next"
-            onClick={goNextPage}
-            aria-label="Next page"
-          >
-            <ChevronDown size={24} strokeWidth={1.5} />
-          </button>
-
-          <div className="bottom-status">
-            <div>
-              <span className="status-dot"></span>
-              <strong>Online</strong>
-            </div>
-            <div>{timeStr}</div>
-          </div>
-          {/* */}
-          <Dots>
-            {theme.themes.map((_: any, index: number) => (
-              <DotButton
-                key={index}
-                active={currentBg === index}
-                onClick={() => setCurrentBg(index)}
-                label={theme.themes[index].name}
-                labelAlign="left"
-              />
-            ))}
-          </Dots>
-        </Layout>
-      </StyledThemeProvider>
+            {/* */}
+            <Dots>
+              {theme.themes.map((_: any, index: number) => (
+                <DotButton
+                  key={index}
+                  active={currentBg === index}
+                  onClick={() => setCurrentBg(index)}
+                  label={theme.themes[index].name}
+                  labelAlign="left"
+                />
+              ))}
+            </Dots>
+          </Layout>
+        </StyledThemeProvider>
+      </MusicProvider>
     </>
   );
 }
@@ -328,6 +335,29 @@ const Layout = styled.div`
     margin-right: 7px;
   }
 
+  .global-player {
+    position: fixed;
+    z-index: 50;
+    right: 30px;
+    bottom: 30px;
+    width: 280px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    color: #fff;
+    transform: scale(0.9);
+    transform-origin: bottom right;
+    transition: 0.3s ease;
+
+    &:hover {
+      transform: scale(1);
+    }
+  }
+
   @media (max-width: 720px) {
     .nav {
       left: 18px;
@@ -341,6 +371,12 @@ const Layout = styled.div`
       left: 58px;
       right: 22px;
       bottom: 20px;
+    }
+    .global-player {
+      width: calc(100vw - 40px);
+      right: 20px;
+      bottom: 80px;
+      transform: scale(1);
     }
     .page {
       padding: 80px 7vw 80px 12vw;
