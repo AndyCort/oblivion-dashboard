@@ -1,5 +1,5 @@
 import Moments from "../components/Moments";
-import { moments } from "../components/data/moments";
+import { useMoments } from "../hooks/useMoments";
 import styled from "styled-components";
 
 interface Props {
@@ -7,9 +7,11 @@ interface Props {
 }
 
 export function SpacePage({ isActive }: Props) {
+  const { moments, isLoading } = useMoments();
+
   return (
     <Section className={`page ${isActive ? "active" : ""}`} id="space">
-      <Moments moments={moments} />
+      <Moments moments={moments} isLoading={isLoading} />
     </Section>
   );
 }
