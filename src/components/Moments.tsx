@@ -114,7 +114,7 @@ const MomentsContainer = styled.div`
     -webkit-backdrop-filter: blur(12px);
     padding: 20px;
     gap: 20px;
-
+    font-family: "LXGW WenKai TC";
     header {
       display: flex;
       gap: 10px;
