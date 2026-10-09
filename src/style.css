@@ -5,12 +5,20 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --color-muted: #9d9d9d;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
 /*p,
 span,
@@ -53,4 +61,3 @@ body {
     linear-gradient(135deg, #eee9e8, #dcd8df);
   transition: background 1.2s ease;
 }
-

@@ -11,7 +11,7 @@ export interface MomentsProps {
 }
 
 const author = "Andy";
-const size = 12;
+const footerIconSize = 14;
 
 const momentFadeIn = keyframes`
   from {
@@ -114,7 +114,7 @@ const SkeletonPill = styled(SkeletonPulse)<{ $width: string }>`
 const CardHeader = styled.header`
   display: flex;
   gap: 10px;
-  font-size: ${1.5 * size}px;
+  font-size: 18px;
 `;
 
 const Avatar = styled.div`
@@ -138,7 +138,7 @@ const Author = styled.div`
 `;
 
 const TextContainer = styled.div`
-  margin: 20px 0;
+  margin: 10px 0 5px 0;
   white-space: pre-wrap;
   word-break: break-word;
   font-family: "EB Garamond", "LXGW WenKai TC", Georgia, serif;
@@ -151,7 +151,7 @@ const MediaContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin: 8px 0;
+  margin: 5px 0;
 
   img,
   video {
@@ -166,7 +166,7 @@ const MediaContainer = styled.div`
 const TagsContainer = styled.div`
   display: flex;
   gap: 16px;
-  margin: 16px 0;
+  margin: 5px 0;
   font-family: "LXGW WenKai TC";
 `;
 
@@ -174,32 +174,60 @@ const TagItem = styled.span`
   color: oklch(0.8 0.1 263);
 `;
 
-const LocationContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin: 8px 0;
-  font-size: 12px;
-  font-family: "LXGW WenKai TC";
-`;
-
 const CardFooter = styled.footer`
-  font-size: ${1.2 * size}px;
+  font-size: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  color: var(--color-muted);
+  margin: 10px 0 0 0;
+  line-height: 1;
 `;
 
-const FooterItem = styled.span`
+const FooterLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-muted);
+  line-height: 1;
+`;
+
+const LocationItem = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: -2px; /* 修正 SVG 图标内置左内边距，使图标视觉边缘与卡片正文/标签严格左对齐 */
+  font-family: inherit;
+
+  svg {
+    flex-shrink: 0;
+    transform: translateY(-0.5px);
+  }
+`;
+
+const DotDivider = styled.span`
+  opacity: 0.5;
+  font-size: 12px;
+  user-select: none;
+`;
+
+const TimeItem = styled.span`
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+`;
+
+const FooterRight = styled.span`
   display: flex;
   align-items: center;
   gap: 4px;
+  color: var(--color-muted);
 `;
 
 const MusicLink = styled.a`
   text-decoration: none;
-  color: #ffffff;
+  color: var(--color-muted);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -210,7 +238,10 @@ const MusicLink = styled.a`
   }
 `;
 
-export default function Moments({ moments = defaultMoments, isLoading = false }: MomentsProps) {
+export default function Moments({
+  moments = defaultMoments,
+  isLoading = false,
+}: MomentsProps) {
   const { playTrack } = useMusic();
   const sortedMoments = [...moments].sort((a, b) => b.time - a.time);
 
@@ -267,7 +298,13 @@ export default function Moments({ moments = defaultMoments, isLoading = false }:
                   item.type === "img" ? (
                     <img key={mIdx} src={item.url} alt="" loading="lazy" />
                   ) : (
-                    <video key={mIdx} src={item.url} controls playsInline preload="metadata" />
+                    <video
+                      key={mIdx}
+                      src={item.url}
+                      controls
+                      playsInline
+                      preload="metadata"
+                    />
                   ),
                 )}
               </MediaContainer>
@@ -281,17 +318,22 @@ export default function Moments({ moments = defaultMoments, isLoading = false }:
               </TagsContainer>
             )}
 
-            {moment.location && (
-              <LocationContainer>
-                <MapPin size={size} strokeWidth={3} /> {moment.location}
-              </LocationContainer>
-            )}
-
             <CardFooter>
-              <FooterItem>{formatTime(moment.time)}</FooterItem>
+              <FooterLeft>
+                {moment.location && (
+                  <>
+                    <LocationItem>
+                      <MapPin size={footerIconSize} strokeWidth={2.2} />
+                      <span>{moment.location}</span>
+                    </LocationItem>
+                    <DotDivider>·</DotDivider>
+                  </>
+                )}
+                <TimeItem>{formatTime(moment.time)}</TimeItem>
+              </FooterLeft>
 
               {moment.music && (
-                <FooterItem>
+                <FooterRight>
                   <MusicLink
                     href="#"
                     onClick={(e) => {
@@ -305,9 +347,10 @@ export default function Moments({ moments = defaultMoments, isLoading = false }:
                       }
                     }}
                   >
-                    <Music2 size={size} /> {moment.music.title} - {moment.music.artist}
+                    <Music2 size={footerIconSize} /> {moment.music.title} -{" "}
+                    {moment.music.artist}
                   </MusicLink>
-                </FooterItem>
+                </FooterRight>
               )}
             </CardFooter>
           </Article>
