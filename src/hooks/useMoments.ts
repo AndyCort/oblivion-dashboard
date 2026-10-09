@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import type { Moment } from "../components/data/moments";
 import { moments as localFallbackMoments } from "../components/data/moments";
 
+const DEFAULT_API_URL = "https://admin.sorrow.love/api/public/moments";
+const FALLBACK_API_URL = "https://oblivion-cms.pages.dev/api/public/moments";
 const RAW_API_URL = import.meta.env.VITE_CMS_API_URL;
 
 /**
  * 判断环境变量配置的 CMS URL 是否为合法且非占位符的真实地址
  */
-function isValidCmsUrl(url?: string): boolean {
+function isValidCmsUrl(url?: string): url is string {
   if (!url || typeof url !== "string") return false;
   const trimmed = url.trim();
   if (
@@ -24,6 +26,24 @@ function isValidCmsUrl(url?: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * 获取请求候选节点列表（优先环境变量/指定域名，其次 Pages 备选节点）
+ */
+function getCandidateUrls(): string[] {
+  const candidates: string[] = [];
+  if (isValidCmsUrl(RAW_API_URL)) {
+    candidates.push(RAW_API_URL.trim());
+  } else {
+    candidates.push(DEFAULT_API_URL);
+  }
+
+  if (!candidates.includes(FALLBACK_API_URL)) {
+    candidates.push(FALLBACK_API_URL);
+  }
+
+  return candidates;
 }
 
 /**
@@ -76,21 +96,54 @@ function normalizeMoment(item: Record<string, unknown>): Moment {
   };
 }
 
+async function fetchFromEndpoint(url: string, signal: AbortSignal): Promise<Moment[]> {
+  const res = await fetch(url, {
+    signal,
+    headers: { Accept: "application/json" },
+  });
+
+  if (!res.ok) {
+    throw new Error(`HTTP error ${res.status}: ${res.statusText}`);
+  }
+
+  const contentType = res.headers.get("content-type") || "";
+  if (!contentType.includes("application/json") && !contentType.includes("text/json")) {
+    throw new Error(
+      `响应非 JSON 格式 (${contentType})，可能是被 Cloudflare Zero Trust / Access 登录页拦截`
+    );
+  }
+
+  const json = await res.json();
+  const rawList = Array.isArray(json)
+    ? json
+    : Array.isArray(json?.data)
+      ? json.data
+      : Array.isArray(json?.moments)
+        ? json.moments
+        : null;
+
+  if (!rawList) {
+    throw new Error("CMS API 返回的数据结构未包含合法的说说列表");
+  }
+
+  return (rawList as Record<string, unknown>[]).map(normalizeMoment);
+}
+
+const CANDIDATE_URLS = getCandidateUrls();
+
 export function useMoments() {
-  const isUrlConfigured = isValidCmsUrl(RAW_API_URL);
   const [moments, setMoments] = useState<Moment[]>(localFallbackMoments);
-  const [isLoading, setIsLoading] = useState<boolean>(isUrlConfigured);
+  const [isLoading, setIsLoading] = useState<boolean>(CANDIDATE_URLS.length > 0);
   const [error, setError] = useState<Error | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const refresh = useCallback(() => {
-    if (!isUrlConfigured) return;
     setIsLoading(true);
     setRefreshTrigger((prev) => prev + 1);
-  }, [isUrlConfigured]);
+  }, []);
 
   useEffect(() => {
-    if (!isUrlConfigured) {
+    if (CANDIDATE_URLS.length === 0) {
       return;
     }
 
@@ -101,59 +154,50 @@ export function useMoments() {
     }, 8000);
 
     const fetchMoments = async () => {
-      try {
-        const res = await fetch(RAW_API_URL!, {
-          signal: controller.signal,
-          headers: { Accept: "application/json" },
-        });
+      let lastError: Error | null = null;
+      let loadedMoments: Moment[] | null = null;
 
-        if (!res.ok) {
-          throw new Error(`HTTP error ${res.status}: ${res.statusText}`);
+      for (let i = 0; i < CANDIDATE_URLS.length; i++) {
+        const url = CANDIDATE_URLS[i];
+        try {
+          loadedMoments = await fetchFromEndpoint(url, controller.signal);
+          break;
+        } catch (err: unknown) {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          }
+          lastError = err instanceof Error ? err : new Error(String(err));
+          if (i < CANDIDATE_URLS.length - 1) {
+            console.warn(`请求 ${url} 失败:`, err, `\n将尝试备用节点: ${CANDIDATE_URLS[i + 1]}`);
+          }
         }
+      }
 
-        const json = await res.json();
-        const rawList = Array.isArray(json)
-          ? json
-          : Array.isArray(json?.data)
-            ? json.data
-            : Array.isArray(json?.moments)
-              ? json.moments
-              : null;
-
-        if (!rawList) {
-          throw new Error("CMS API 返回的数据结构未包含合法的说说列表");
-        }
-
-        const parsed = (rawList as Record<string, unknown>[]).map(normalizeMoment);
-        if (isMounted) {
-          setMoments(parsed);
+      if (isMounted) {
+        if (loadedMoments) {
+          setMoments(loadedMoments);
           setError(null);
-        }
-      } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          return;
-        }
-        console.warn("无法从 CMS 获取最新说说，已回退至本地数据:", err);
-        if (isMounted) {
-          setError(err instanceof Error ? err : new Error(String(err)));
+        } else {
+          console.warn("无法从 CMS 获取最新说说，已回退至本地数据:", lastError);
+          setError(lastError);
           setMoments(localFallbackMoments);
-        }
-      } finally {
-        if (isMounted) {
-          clearTimeout(timeoutId);
-          setIsLoading(false);
         }
       }
     };
 
-    void fetchMoments();
+    fetchMoments().finally(() => {
+      if (isMounted) {
+        clearTimeout(timeoutId);
+        setIsLoading(false);
+      }
+    });
 
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [isUrlConfigured, refreshTrigger]);
+  }, [refreshTrigger]);
 
   return {
     moments,
