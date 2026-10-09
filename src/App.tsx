@@ -28,9 +28,6 @@ const GlobalBodyStyle = createGlobalStyle`
 
 function App() {
   const theme = useTheme() as any;
-  // 背景图设置
-  const [currentBg, setCurrentBg] = useState(3);
-
   const [activePage, setActivePage] = useState<Page>("home");
 
   useEffect(() => {
@@ -76,7 +73,7 @@ function App() {
     document.body.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  const currentTheme = theme.themes[currentBg];
+  const currentTheme = theme.themes[0];
   const combinedTheme = {
     ...currentTheme.colors,
     fontSizes: theme.fontSizes,
@@ -151,18 +148,6 @@ function App() {
             
             <MusicPlayer className="global-player" />
 
-            {/* */}
-            <Dots>
-              {theme.themes.map((_: any, index: number) => (
-                <DotButton
-                  key={index}
-                  active={currentBg === index}
-                  onClick={() => setCurrentBg(index)}
-                  label={theme.themes[index].name}
-                  labelAlign="left"
-                />
-              ))}
-            </Dots>
           </Layout>
         </StyledThemeProvider>
       </MusicProvider>
@@ -177,16 +162,6 @@ const Background = styled.div<{ $bg: string }>`
   background: url(${({ $bg }) => $bg}) center / cover no-repeat;
 `;
 
-const Dots = styled.div`
-  position: fixed;
-  right: 30px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
 const Layout = styled.div`
   position: relative;
   width: 100vw;

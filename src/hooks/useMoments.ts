@@ -3,7 +3,6 @@ import type { Moment } from "../components/data/moments";
 import { moments as localFallbackMoments } from "../components/data/moments";
 
 const DEFAULT_API_URL = "https://admin.sorrow.love/api/public/moments";
-const FALLBACK_API_URL = "https://oblivion-cms.pages.dev/api/public/moments";
 const RAW_API_URL = import.meta.env.VITE_CMS_API_URL;
 
 /**
@@ -28,23 +27,7 @@ function isValidCmsUrl(url?: string): url is string {
   }
 }
 
-/**
- * 获取请求候选节点列表（优先环境变量/指定域名，其次 Pages 备选节点）
- */
-function getCandidateUrls(): string[] {
-  const candidates: string[] = [];
-  if (isValidCmsUrl(RAW_API_URL)) {
-    candidates.push(RAW_API_URL.trim());
-  } else {
-    candidates.push(DEFAULT_API_URL);
-  }
-
-  if (!candidates.includes(FALLBACK_API_URL)) {
-    candidates.push(FALLBACK_API_URL);
-  }
-
-  return candidates;
-}
+const API_URL = isValidCmsUrl(RAW_API_URL) ? RAW_API_URL.trim() : DEFAULT_API_URL;
 
 /**
  * 防御性格式化 CMS 返回的说说数据，确保与 Moment 结构完全一致
@@ -108,9 +91,7 @@ async function fetchFromEndpoint(url: string, signal: AbortSignal): Promise<Mome
 
   const contentType = res.headers.get("content-type") || "";
   if (!contentType.includes("application/json") && !contentType.includes("text/json")) {
-    throw new Error(
-      `响应非 JSON 格式 (${contentType})，可能是被 Cloudflare Zero Trust / Access 登录页拦截`
-    );
+    throw new Error(`响应非 JSON 格式 (${contentType})`);
   }
 
   const json = await res.json();
@@ -129,11 +110,9 @@ async function fetchFromEndpoint(url: string, signal: AbortSignal): Promise<Mome
   return (rawList as Record<string, unknown>[]).map(normalizeMoment);
 }
 
-const CANDIDATE_URLS = getCandidateUrls();
-
 export function useMoments() {
   const [moments, setMoments] = useState<Moment[]>(localFallbackMoments);
-  const [isLoading, setIsLoading] = useState<boolean>(CANDIDATE_URLS.length > 0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -143,10 +122,6 @@ export function useMoments() {
   }, []);
 
   useEffect(() => {
-    if (CANDIDATE_URLS.length === 0) {
-      return;
-    }
-
     let isMounted = true;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -154,31 +129,19 @@ export function useMoments() {
     }, 8000);
 
     const fetchMoments = async () => {
-      let lastError: Error | null = null;
-      let loadedMoments: Moment[] | null = null;
-
-      for (let i = 0; i < CANDIDATE_URLS.length; i++) {
-        const url = CANDIDATE_URLS[i];
-        try {
-          loadedMoments = await fetchFromEndpoint(url, controller.signal);
-          break;
-        } catch (err: unknown) {
-          if (err instanceof DOMException && err.name === "AbortError") {
-            return;
-          }
-          lastError = err instanceof Error ? err : new Error(String(err));
-          if (i < CANDIDATE_URLS.length - 1) {
-            console.warn(`请求 ${url} 失败:`, err, `\n将尝试备用节点: ${CANDIDATE_URLS[i + 1]}`);
-          }
-        }
-      }
-
-      if (isMounted) {
-        if (loadedMoments) {
+      try {
+        const loadedMoments = await fetchFromEndpoint(API_URL, controller.signal);
+        if (isMounted) {
           setMoments(loadedMoments);
           setError(null);
-        } else {
-          console.warn("无法从 CMS 获取最新说说，已回退至本地数据:", lastError);
+        }
+      } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          return;
+        }
+        const lastError = err instanceof Error ? err : new Error(String(err));
+        console.warn(`从 ${API_URL} 获取最新说说失败，已回退至本地数据:`, lastError);
+        if (isMounted) {
           setError(lastError);
           setMoments(localFallbackMoments);
         }
