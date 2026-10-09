@@ -1,5 +1,4 @@
 import styled from "styled-components";
-
 import { Weather } from "../components/Weather";
 
 interface Props {
@@ -9,31 +8,23 @@ interface Props {
 export function NowPage({ isActive }: Props) {
   return (
     <section className={`page ${isActive ? "active" : ""}`} id="now">
-      <GlassPanel style={{ width: "min(1200px, 86vw)" }}>
-        <div className="eyebrow">Currently</div>
-        <h2>Focus & Environment.</h2>
-        <p>
+      <GlassPanel>
+        <Eyebrow>Currently</Eyebrow>
+        <Title>Focus & Environment.</Title>
+        <Description>
           A snapshot of the present moment. Managing tasks, music, and
           environment.
-        </p>
-        <div
-          style={{
-            display: "flex",
-            gap: "2rem",
-            marginTop: "2rem",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-          }}
-        >
+        </Description>
+        <WidgetGrid>
           <Weather className="ambient-component" />
-        </div>
+        </WidgetGrid>
       </GlassPanel>
     </section>
   );
 }
 
 const GlassPanel = styled.div`
-  width: min(1000px, 76vw);
+  width: min(1200px, 86vw);
   padding: 42px 48px;
   border: 1px solid ${({ theme }) => theme.line};
   border-radius: 34px;
@@ -50,23 +41,42 @@ const GlassPanel = styled.div`
   display: flex;
   flex-direction: column;
 
-  h2 {
-    margin: 0 0 18px;
-    font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(38px, 5vw, 64px);
-    font-weight: 400;
-  }
-  p {
-    margin: 0;
-    max-width: 520px;
-    color: rgba(40, 37, 42, 0.62);
-    line-height: 1.8;
-    font-size: 14px;
   @media (max-width: 720px) {
     padding: 24px 20px;
-    
-    h2 {
-      font-size: clamp(32px, 8vw, 42px);
-    }
   }
+`;
+
+const Eyebrow = styled.div`
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.muted};
+  margin-bottom: 8px;
+`;
+
+const Title = styled.h2`
+  margin: 0 0 18px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(38px, 5vw, 64px);
+  font-weight: 400;
+
+  @media (max-width: 720px) {
+    font-size: clamp(32px, 8vw, 42px);
+  }
+`;
+
+const Description = styled.p`
+  margin: 0;
+  max-width: 520px;
+  color: rgba(40, 37, 42, 0.62);
+  line-height: 1.8;
+  font-size: 14px;
+`;
+
+const WidgetGrid = styled.div`
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
 `;

@@ -9,6 +9,7 @@ import styled, {
   useTheme,
   ThemeProvider as StyledThemeProvider,
   createGlobalStyle,
+  keyframes,
 } from "styled-components";
 import { DotButton } from "./components/ui/DotButton";
 import { GlobalConfig } from "./config/GlobalConfig";
@@ -82,7 +83,7 @@ function App() {
   return (
     <>
       <Background $bg={currentTheme.bgImg} />
-      <div className="ambient-orb"></div>
+      <AmbientOrb />
 
       <MusicProvider>
         <StyledThemeProvider theme={combinedTheme}>
@@ -160,6 +161,38 @@ const Background = styled.div<{ $bg: string }>`
   inset: 0;
   z-index: -1;
   background: url(${({ $bg }) => $bg}) center / cover no-repeat;
+`;
+
+const breathe = keyframes`
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+`;
+
+const AmbientOrb = styled.div`
+  position: fixed;
+  width: 42vw;
+  height: 42vw;
+  max-width: 620px;
+  max-height: 620px;
+  border-radius: 50%;
+  left: 58%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.5),
+    rgba(214, 195, 220, 0.14) 45%,
+    transparent 70%
+  );
+  filter: blur(8px);
+  pointer-events: none;
+  animation: ${breathe} 9s ease-in-out infinite;
+  z-index: 0;
 `;
 
 const Layout = styled.div`

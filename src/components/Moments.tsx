@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import type { Moment } from "./data/moments";
 import { moments as defaultMoments } from "./data/moments";
 import { MapPin, Music2 } from "lucide-react";
@@ -13,6 +13,203 @@ export interface MomentsProps {
 const author = "Andy";
 const size = 12;
 
+const momentFadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const skeletonShimmer = keyframes`
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+`;
+
+const MomentsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  color: #ffffff;
+`;
+
+const Article = styled.article<{ $delay?: number }>`
+  height: auto;
+  width: clamp(200px, 40vw, 1200px);
+  border-radius: 12px;
+  border: 1px solid #00000020;
+  background: #000000bb;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px;
+  gap: 20px;
+  animation: ${momentFadeIn} 0.35s ease-out backwards;
+  animation-delay: ${(props) => props.$delay ?? 0}s;
+`;
+
+const SkeletonCard = styled(Article)`
+  pointer-events: none;
+  user-select: none;
+  animation: none;
+`;
+
+const SkeletonPulse = styled.div`
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.1) 37%,
+    rgba(255, 255, 255, 0.04) 63%
+  );
+  background-size: 400% 100%;
+  animation: ${skeletonShimmer} 1.8s ease-in-out infinite;
+`;
+
+const SkeletonAvatar = styled(SkeletonPulse)`
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+`;
+
+const SkeletonAuthor = styled(SkeletonPulse)`
+  width: 64px;
+  height: 16px;
+  border-radius: 4px;
+`;
+
+const SkeletonBody = styled.div`
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const SkeletonLine = styled(SkeletonPulse)<{ $width: string }>`
+  width: ${(props) => props.$width};
+  height: 15px;
+  border-radius: 4px;
+`;
+
+const SkeletonFooter = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+`;
+
+const SkeletonPill = styled(SkeletonPulse)<{ $width: string }>`
+  width: ${(props) => props.$width};
+  height: 14px;
+  border-radius: 4px;
+`;
+
+const CardHeader = styled.header`
+  display: flex;
+  gap: 10px;
+  font-size: ${1.5 * size}px;
+`;
+
+const Avatar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+`;
+
+const Author = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const TextContainer = styled.div`
+  margin: 20px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "EB Garamond", "LXGW WenKai TC", Georgia, serif;
+  letter-spacing: 0.025em;
+  line-height: 1.625;
+  font-size: 15px;
+`;
+
+const MediaContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 8px 0;
+
+  img,
+  video {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    border-radius: 8px;
+  }
+`;
+
+const TagsContainer = styled.div`
+  display: flex;
+  gap: 16px;
+  margin: 16px 0;
+  font-family: "LXGW WenKai TC";
+`;
+
+const TagItem = styled.span`
+  color: oklch(0.8 0.1 263);
+`;
+
+const LocationContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 8px 0;
+  font-size: 12px;
+  font-family: "LXGW WenKai TC";
+`;
+
+const CardFooter = styled.footer`
+  font-size: ${1.2 * size}px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+`;
+
+const FooterItem = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const MusicLink = styled.a`
+  text-decoration: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    font-weight: bold;
+    transition: ease-in-out 0.3s;
+  }
+`;
+
 export default function Moments({ moments = defaultMoments, isLoading = false }: MomentsProps) {
   const { playTrack } = useMusic();
   const sortedMoments = [...moments].sort((a, b) => b.time - a.time);
@@ -22,54 +219,50 @@ export default function Moments({ moments = defaultMoments, isLoading = false }:
       {isLoading ? (
         <>
           {[1, 2, 3].map((id) => (
-            <article key={`skeleton-${id}`} className="skeleton-card" aria-hidden="true">
-              <header>
-                <div className="skeleton-avatar skeleton-pulse" />
-                <div className="skeleton-author skeleton-pulse" />
-              </header>
-              <div className="skeleton-body">
-                <div className="skeleton-line skeleton-pulse" style={{ width: "92%" }} />
-                <div className="skeleton-line skeleton-pulse" style={{ width: "78%" }} />
-                <div className="skeleton-line skeleton-pulse" style={{ width: "54%" }} />
-              </div>
-              <footer className="skeleton-footer">
-                <div className="skeleton-pill skeleton-pulse" style={{ width: "70px" }} />
-                <div className="skeleton-pill skeleton-pulse" style={{ width: "100px" }} />
-              </footer>
-            </article>
+            <SkeletonCard key={`skeleton-${id}`} aria-hidden="true">
+              <CardHeader>
+                <SkeletonAvatar />
+                <SkeletonAuthor />
+              </CardHeader>
+              <SkeletonBody>
+                <SkeletonLine $width="92%" />
+                <SkeletonLine $width="78%" />
+                <SkeletonLine $width="54%" />
+              </SkeletonBody>
+              <SkeletonFooter>
+                <SkeletonPill $width="70px" />
+                <SkeletonPill $width="100px" />
+              </SkeletonFooter>
+            </SkeletonCard>
           ))}
         </>
       ) : (
         sortedMoments.map((moment, index) => (
-          <article
+          <Article
             key={`${moment.time}-${index}`}
-            style={{ animationDelay: `${Math.min(index * 0.05, 0.25)}s` }}
+            $delay={Math.min(index * 0.05, 0.25)}
           >
-            <header>
-              <div className="avatar">
+            <CardHeader>
+              <Avatar>
                 <img
                   src="https://raw.githubusercontent.com/AndyCort/PicGo/master/img/6C93394B-9A64-4DCE-BA19-3E6A316120D1_1_201_a.jpeg"
                   alt={author}
                   loading="lazy"
                 />
-              </div>
-              <div className="author">{author}</div>
-            </header>
+              </Avatar>
+              <Author>{author}</Author>
+            </CardHeader>
 
-            {/* 文字 */}
-            <div className="text-container">
-              {moment.content && (
-                <div>
-                  {typeof moment.content === "string"
-                    ? moment.content
-                    : moment.content.zh}
-                </div>
-              )}
-            </div>
+            {moment.content && (
+              <TextContainer>
+                {typeof moment.content === "string"
+                  ? moment.content
+                  : moment.content.zh}
+              </TextContainer>
+            )}
 
-            {/* 图片 / 视频 */}
             {moment.media && moment.media.length > 0 && (
-              <div className="media-container">
+              <MediaContainer>
                 {moment.media.map((item, mIdx) =>
                   item.type === "img" ? (
                     <img key={mIdx} src={item.url} alt="" loading="lazy" />
@@ -77,34 +270,29 @@ export default function Moments({ moments = defaultMoments, isLoading = false }:
                     <video key={mIdx} src={item.url} controls playsInline preload="metadata" />
                   ),
                 )}
-              </div>
+              </MediaContainer>
             )}
 
-            {/* Tag */}
             {moment.tags && moment.tags.length > 0 && (
-              <div className="tags-container">
+              <TagsContainer>
                 {moment.tags.map((tag) => (
-                  <span key={tag}>#{tag}</span>
+                  <TagItem key={tag}>#{tag}</TagItem>
                 ))}
-              </div>
+              </TagsContainer>
             )}
 
-            {/* 位置 */}
             {moment.location && (
-              <div className="location-container">
+              <LocationContainer>
                 <MapPin size={size} strokeWidth={3} /> {moment.location}
-              </div>
+              </LocationContainer>
             )}
 
-            {/* 底部 */}
-            <footer>
-              {/* 左边：时间 */}
-              <span>{formatTime(moment.time)}</span>
+            <CardFooter>
+              <FooterItem>{formatTime(moment.time)}</FooterItem>
 
-              {/* 右边：音乐等 */}
               {moment.music && (
-                <span>
-                  <a
+                <FooterItem>
+                  <MusicLink
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
@@ -117,204 +305,14 @@ export default function Moments({ moments = defaultMoments, isLoading = false }:
                       }
                     }}
                   >
-                    <Music2 size={size} /> {moment.music.title} -{" "}
-                    {moment.music.artist}
-                  </a>
-                </span>
+                    <Music2 size={size} /> {moment.music.title} - {moment.music.artist}
+                  </MusicLink>
+                </FooterItem>
               )}
-            </footer>
-          </article>
+            </CardFooter>
+          </Article>
         ))
       )}
     </MomentsContainer>
   );
 }
-
-const MomentsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 20px;
-  padding: 20px;
-  color: #ffffff;
-
-  @keyframes momentFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes skeletonShimmer {
-    0% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0 50%;
-    }
-  }
-
-  article {
-    height: auto;
-    width: clamp(200px, 40vw, 1200px);
-    border-radius: 12px;
-    border: 1px solid #00000020;
-    background: #000000bb;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 20px;
-    gap: 20px;
-    animation: momentFadeIn 0.35s ease-out backwards;
-
-    &.skeleton-card {
-      pointer-events: none;
-      user-select: none;
-      animation: none;
-    }
-
-    .skeleton-pulse {
-      background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.04) 25%,
-        rgba(255, 255, 255, 0.1) 37%,
-        rgba(255, 255, 255, 0.04) 63%
-      );
-      background-size: 400% 100%;
-      animation: skeletonShimmer 1.8s ease-in-out infinite;
-    }
-
-    .skeleton-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-    }
-
-    .skeleton-author {
-      width: 64px;
-      height: 16px;
-      border-radius: 4px;
-    }
-
-    .skeleton-body {
-      margin: 20px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .skeleton-line {
-      height: 15px;
-      border-radius: 4px;
-    }
-
-    .skeleton-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 16px;
-    }
-
-    .skeleton-pill {
-      height: 14px;
-      border-radius: 4px;
-    }
-
-    header {
-      display: flex;
-      gap: 10px;
-      font-size: ${1.5 * size}px;
-
-      .avatar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 36px;
-        width: 36px;
-        border-radius: 50%;
-        img {
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-        }
-      }
-
-      .author {
-        display: flex;
-        align-items: center;
-      }
-    }
-
-    .text-container {
-      margin: 20px 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: "EB Garamond", "LXGW WenKai TC", Georgia, serif;
-      letter-spacing: 0.025em;
-      line-height: 1.625;
-      font-size: 15px;
-    }
-
-    .media-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin: 8px 0;
-
-      img,
-      video {
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        object-fit: cover;
-        display: block;
-        border-radius: 8px;
-      }
-    }
-
-    .tags-container {
-      display: flex;
-      gap: 16px;
-      margin: 16px 0;
-      font-family: "LXGW WenKai TC";
-      span {
-        color: oklch(0.8 0.1 263);
-      }
-    }
-
-    .location-container {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin: 8px 0;
-      font-size: 12px;
-      font-family: "LXGW WenKai TC";
-    }
-
-    footer {
-      font-size: ${1.2 * size}px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-
-      span {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-
-        a {
-          text-decoration: none;
-          color: #ffffff;
-
-          &:hover {
-            font-weight: bold;
-            transition: ease-in-out 0.3s;
-          }
-        }
-      }
-    }
-  }
-`;

@@ -1,4 +1,4 @@
-import styled, { useTheme } from "styled-components";
+import styled from "styled-components";
 import { SpaceCenter, Ring, RingText } from "../components/ui/SharedStyles";
 
 interface Props {
@@ -6,36 +6,15 @@ interface Props {
 }
 
 export function NotesPage({ isActive }: Props) {
-  const theme = useTheme() as any;
   return (
     <section className={`page ${isActive ? "active" : ""}`} id="notes">
       <NotesContainer>
-        <FloatingCard className="card-quick">
-          <div
-            style={{
-              fontSize: "9px",
-              color: theme.muted,
-              textTransform: "uppercase",
-              letterSpacing: "0.2em",
-              marginBottom: "10px",
-            }}
-          >
-            Quick Notes
-          </div>
-        </FloatingCard>
-        <FloatingCard className="card-tasks">
-          <div
-            style={{
-              fontSize: "9px",
-              color: theme.muted,
-              textTransform: "uppercase",
-              letterSpacing: "0.2em",
-              marginBottom: "10px",
-            }}
-          >
-            Tasks
-          </div>
-        </FloatingCard>
+        <QuickCard>
+          <CardCategory>Quick Notes</CardCategory>
+        </QuickCard>
+        <TasksCard>
+          <CardCategory>Tasks</CardCategory>
+        </TasksCard>
         <SpaceCenter className="ring-center">
           <Ring>
             <RingText>Notes</RingText>
@@ -54,17 +33,8 @@ const NotesContainer = styled.div`
   display: grid;
   place-items: center;
 
-  .card-quick {
-    left: 10%;
-    top: 15%;
-    width: 300px;
-    transform: rotate(-2deg);
-  }
-  .card-tasks {
-    right: 10%;
-    bottom: 15%;
-    width: 350px;
-    transform: rotate(1deg);
+  .ring-center {
+    z-index: 1;
   }
 
   @media (max-width: 900px) {
@@ -75,18 +45,6 @@ const NotesContainer = styled.div`
     padding-bottom: 80px;
     overflow-y: auto;
 
-    .card-quick,
-    .card-tasks {
-      position: relative;
-      left: auto;
-      right: auto;
-      top: auto;
-      bottom: auto;
-      transform: none;
-      width: 100%;
-      max-width: 400px;
-    }
-
     .ring-center {
       order: -1;
       margin-bottom: 12px;
@@ -95,7 +53,6 @@ const NotesContainer = styled.div`
 `;
 
 const FloatingCard = styled.div`
-  position: absolute;
   border: 1px solid ${({ theme }) => theme.line};
   background: rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(18px);
@@ -104,4 +61,46 @@ const FloatingCard = styled.div`
   border-radius: 24px;
   padding: 24px;
   color: ${({ theme }) => theme.ink};
+`;
+
+const QuickCard = styled(FloatingCard)`
+  position: absolute;
+  left: 10%;
+  top: 15%;
+  width: 300px;
+  transform: rotate(-2deg);
+
+  @media (max-width: 900px) {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    max-width: 400px;
+  }
+`;
+
+const TasksCard = styled(FloatingCard)`
+  position: absolute;
+  right: 10%;
+  bottom: 15%;
+  width: 350px;
+  transform: rotate(1deg);
+
+  @media (max-width: 900px) {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    transform: none;
+    width: 100%;
+    max-width: 400px;
+  }
+`;
+
+const CardCategory = styled.div`
+  font-size: 9px;
+  color: ${({ theme }) => theme.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 10px;
 `;

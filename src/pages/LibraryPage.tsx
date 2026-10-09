@@ -8,9 +8,9 @@ export function LibraryPage({ isActive }: Props) {
   return (
     <section className={`page ${isActive ? "active" : ""}`} id="library">
       <LibraryContainer>
-        <BookCard className="book-reading">
-          <div className="book-category">Reading</div>
-          <div className="book-title">
+        <ReadingBookCard>
+          <BookCategory>Reading</BookCategory>
+          <BookTitle>
             The
             <br />
             Design
@@ -18,18 +18,18 @@ export function LibraryPage({ isActive }: Props) {
             of Everyday
             <br />
             Things
-          </div>
-          <div className="book-author">DON NORMAN</div>
-        </BookCard>
-        <BookCard className="book-listening">
-          <div className="book-category">Listening</div>
-          <div className="book-title">
+          </BookTitle>
+          <BookAuthor>DON NORMAN</BookAuthor>
+        </ReadingBookCard>
+        <ListeningBookCard>
+          <BookCategory>Listening</BookCategory>
+          <BookTitle>
             A quiet
             <br />
             afternoon.
-          </div>
-          <div className="book-author">NOW PLAYING</div>
-        </BookCard>
+          </BookTitle>
+          <BookAuthor>NOW PLAYING</BookAuthor>
+        </ListeningBookCard>
       </LibraryContainer>
     </section>
   );
@@ -57,38 +57,36 @@ const BookCard = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+`;
 
-  &.book-reading {
-    height: 270px;
-  }
+const ReadingBookCard = styled(BookCard)`
+  height: 270px;
+`;
 
-  &.book-listening {
-    height: 235px;
-    transform: translateY(25px) rotate(4deg);
-  }
-
-  .book-category {
-    font-size: 9px;
-    color: ${({ theme }) => theme.muted};
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-  }
-
-  .book-title {
-    font-family: "Playfair Display", Georgia, serif;
-    font-size: 27px;
-    line-height: 1.1;
-  }
-
-  .book-author {
-    font-size: 10px;
-    color: ${({ theme }) => theme.muted};
-    letter-spacing: 0.1em;
-  }
+const ListeningBookCard = styled(BookCard)`
+  height: 235px;
+  transform: translateY(25px) rotate(4deg);
 
   @media (max-width: 720px) {
-    &.book-listening {
-      transform: none;
-    }
+    transform: none;
   }
+`;
+
+const BookCategory = styled.div`
+  font-size: 9px;
+  color: ${({ theme }) => theme.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+`;
+
+const BookTitle = styled.div`
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 27px;
+  line-height: 1.1;
+`;
+
+const BookAuthor = styled.div`
+  font-size: 10px;
+  color: ${({ theme }) => theme.muted};
+  letter-spacing: 0.1em;
 `;

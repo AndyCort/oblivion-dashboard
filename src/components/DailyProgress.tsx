@@ -1,6 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import styled from "styled-components";
+import { WidgetBase, WidgetTitle, FlexCenter } from "./ui/Shared";
 
-export function DailyProgress({ className = '' }: { className?: string }) {
+const ProgressWidget = styled(WidgetBase)``;
+
+const CircleContainer = styled(FlexCenter)`
+  position: relative;
+`;
+
+const AnimatedCircle = styled.circle<{ $dasharray: number; $dashoffset: number }>`
+  transition: stroke-dashoffset 1s ease-in-out;
+  stroke-dasharray: ${(props) => props.$dasharray};
+  stroke-dashoffset: ${(props) => props.$dashoffset};
+`;
+
+const PercentageText = styled.div`
+  position: absolute;
+  font-weight: 300;
+  font-size: 1.2rem;
+`;
+
+export function DailyProgress({ className = "" }: { className?: string }) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -20,27 +40,26 @@ export function DailyProgress({ className = '' }: { className?: string }) {
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className={`widget ${className}`}>
-      <div className="widget-title">Day Progress</div>
-      <div className="flex-center" style={{ position: 'relative' }}>
+    <ProgressWidget className={className}>
+      <WidgetTitle>Day Progress</WidgetTitle>
+      <CircleContainer>
         <svg width="100" height="100" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r={radius} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
-          <circle 
-            cx="50" cy="50" r={radius} 
-            fill="none" 
-            stroke="rgba(255,255,255,0.8)" 
-            strokeWidth="8" 
-            strokeDasharray={circumference} 
-            strokeDashoffset={strokeDashoffset} 
+          <AnimatedCircle
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke="rgba(255,255,255,0.8)"
+            strokeWidth="8"
+            $dasharray={circumference}
+            $dashoffset={strokeDashoffset}
             strokeLinecap="round"
             transform="rotate(-90 50 50)"
-            style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
           />
         </svg>
-        <div style={{ position: 'absolute', fontWeight: 300, fontSize: '1.2rem' }}>
-          {Math.round(progress)}%
-        </div>
-      </div>
-    </div>
+        <PercentageText>{Math.round(progress)}%</PercentageText>
+      </CircleContainer>
+    </ProgressWidget>
   );
 }
