@@ -9,7 +9,7 @@ export const SpaceCenter = styled.div`
 
   p {
     margin-top: 24px;
-    color: rgba(40, 37, 42, 0.62);
+    color: ${({ theme }) => theme.muted};
     font-size: 14px;
   }
 `;

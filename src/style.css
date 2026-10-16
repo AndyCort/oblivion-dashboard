@@ -20,22 +20,7 @@
 *::-webkit-scrollbar {
   display: none;
 }
-/*p,
-span,
-a,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-button,
-label,
-li {
-  color: white;
-  mix-blend-mode: difference;
-}
-  */
+
 html,
 body,
 #root {
@@ -60,4 +45,18 @@ body {
     ),
     linear-gradient(135deg, #eee9e8, #dcd8df);
   transition: background 1.2s ease;
+}
+
+button, input, textarea, select { font: inherit; }
+button { touch-action: manipulation; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+img, video { max-width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -3,7 +3,7 @@ import type { Moment } from "./data/moments";
 import { moments as defaultMoments } from "./data/moments";
 import { MapPin, Music2 } from "lucide-react";
 import { formatTime } from "./utils/formatTime";
-import { useMusic } from "../contexts/MusicContext";
+import { useMusic } from "../hooks/musicContext";
 
 export interface MomentsProps {
   moments?: Moment[];
@@ -38,13 +38,16 @@ const MomentsContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   gap: 20px;
-  padding: 20px;
+  padding: 0;
+  width: 100%;
   color: #ffffff;
 `;
 
 const Article = styled.article<{ $delay?: number }>`
   height: auto;
-  width: clamp(200px, 40vw, 1200px);
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
   border-radius: 12px;
   border: 1px solid #00000020;
   background: #000000bb;
@@ -165,6 +168,7 @@ const MediaContainer = styled.div`
 
 const TagsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   margin: 5px 0;
   font-family: "LXGW WenKai TC";
@@ -175,6 +179,8 @@ const TagItem = styled.span`
 `;
 
 const CardFooter = styled.footer`
+  flex-wrap: wrap;
+  line-height: 1.5;
   font-size: 14px;
   display: flex;
   justify-content: space-between;
@@ -186,6 +192,7 @@ const CardFooter = styled.footer`
 `;
 
 const FooterLeft = styled.div`
+  flex-wrap: wrap;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -225,7 +232,13 @@ const FooterRight = styled.span`
   color: var(--color-muted);
 `;
 
-const MusicLink = styled.a`
+const MusicLink = styled.button`
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
+  min-height: 44px;
+  cursor: pointer;
   text-decoration: none;
   color: var(--color-muted);
   display: flex;
@@ -246,7 +259,8 @@ export default function Moments({
   const sortedMoments = [...moments].sort((a, b) => b.time - a.time);
 
   return (
-    <MomentsContainer>
+    <MomentsContainer aria-busy={isLoading}>
+      {!isLoading && moments.length === 0 && <p>还没有发布动态。</p>}
       {isLoading ? (
         <>
           {[1, 2, 3].map((id) => (
@@ -335,7 +349,7 @@ export default function Moments({
               {moment.music && (
                 <FooterRight>
                   <MusicLink
-                    href="#"
+                    type="button"
                     onClick={(e) => {
                       e.preventDefault();
                       if (moment.music) {

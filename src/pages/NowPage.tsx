@@ -1,82 +1,72 @@
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Weather } from "../components/Weather";
+import { ContentPage, Description, Digest, EditorialGrid, Eyebrow, Feature, PageBody, PageHeader, PageTitle, Prose, Sidebar, Tags } from "../components/ui/PageLayout";
+import { nowContent } from "../config/nowContent";
 
-interface Props {
-  isActive: boolean;
-}
-
-export function NowPage({ isActive }: Props) {
+export function NowPage({ isActive }: { isActive: boolean }) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    if (!isActive) return;
+    const update = () => setNow(new Date());
+    update();
+    const interval = window.setInterval(update, 60_000);
+    document.addEventListener("visibilitychange", update);
+    return () => { clearInterval(interval); document.removeEventListener("visibilitychange", update); };
+  }, [isActive]);
+  const dateLabel = now.toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "long" });
   return (
-    <section className={`page ${isActive ? "active" : ""}`} id="now">
-      <GlassPanel>
-        <Eyebrow>Currently</Eyebrow>
-        <Title>Focus & Environment.</Title>
-        <Description>
-          A snapshot of the present moment. Managing tasks, music, and
-          environment.
-        </Description>
-        <WidgetGrid>
-          <Weather className="ambient-component" />
-        </WidgetGrid>
-      </GlassPanel>
-    </section>
+    <ContentPage className={`page ${isActive ? "active" : ""}`} id="now" inert={!isActive} aria-hidden={!isActive}>
+      <PageBody>
+        <PageHeader>
+          <Eyebrow>Now / Life in progress</Eyebrow>
+          <PageTitle>{nowContent.title}</PageTitle>
+          <Description>{nowContent.description}</Description>
+        </PageHeader>
+        <EditorialGrid>
+          <Feature>
+            <Eyebrow>{nowContent.introduction.label} · {dateLabel}</Eyebrow>
+            <h2>{nowContent.introduction.title}</h2>
+            <Prose>{nowContent.introduction.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}<p className="compact">{nowContent.introduction.summary}</p></Prose>
+            <Tags aria-label="近况主题">{nowContent.introduction.tags.map(tag => <li key={tag}>{tag}</li>)}</Tags>
+          </Feature>
+          <NowSidebar aria-label="当前关注与天气">
+            <WeatherBlock><Eyebrow>Outside the window</Eyebrow><CompactWeather /></WeatherBlock>
+            {nowContent.focus.items.slice(0, 2).map((item, index) => <Digest key={item.id}>
+              <Eyebrow>0{index + 1} / {item.category}</Eyebrow><h3>{item.title}</h3><p>{item.summary}</p>
+            </Digest>)}
+          </NowSidebar>
+        </EditorialGrid>
+      </PageBody>
+    </ContentPage>
   );
 }
-
-const GlassPanel = styled.div`
-  width: min(1200px, 86vw);
-  padding: 42px 48px;
-  border: 1px solid ${({ theme }) => theme.line};
-  border-radius: 34px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.11)
-  );
-  box-shadow:
-    inset 0 1px rgba(255, 255, 255, 0.65),
-    0 25px 80px rgba(80, 65, 80, 0.08);
-  backdrop-filter: blur(25px) saturate(120%);
-  -webkit-backdrop-filter: blur(25px) saturate(120%);
-  display: flex;
-  flex-direction: column;
-
-  @media (max-width: 720px) {
-    padding: 24px 20px;
+const NowSidebar = styled(Sidebar)`
+  @media (max-width: 720px) { > article { display: none; } }
+`;
+const WeatherBlock = styled.div`
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid ${({ theme }) => theme.line};
+  @media (max-width: 720px) { margin: 0; padding: 0; border: 0; > p { display: none; } }
+  @container editorial (height < 450px) { padding-bottom: 12px; margin-bottom: 12px; }
+`;
+const CompactWeather = styled(Weather)`
+  && { background: transparent; border: 0; padding: 0; border-radius: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; gap: 4px; align-items: flex-start; text-align: left; }
+  &&:hover { background: transparent; transform: none; box-shadow: none; }
+  .conditions { gap: 12px; }
+  strong { font-size: 36px; }
+  .conditions svg { width: 28px; height: 28px; }
+  @container editorial (height < 450px) {
+    && { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+    strong { font-size: 26px; }
+    small:last-of-type { display: none; }
+    p { font-size: 11px; }
   }
-`;
-
-const Eyebrow = styled.div`
-  font-size: 11px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.muted};
-  margin-bottom: 8px;
-`;
-
-const Title = styled.h2`
-  margin: 0 0 18px;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: clamp(38px, 5vw, 64px);
-  font-weight: 400;
-
   @media (max-width: 720px) {
-    font-size: clamp(32px, 8vw, 42px);
+    && { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+    strong { font-size: 26px; }
+    small:last-of-type { display: none; }
+    p { font-size: 11px; }
   }
-`;
-
-const Description = styled.p`
-  margin: 0;
-  max-width: 520px;
-  color: rgba(40, 37, 42, 0.62);
-  line-height: 1.8;
-  font-size: 14px;
-`;
-
-const WidgetGrid = styled.div`
-  display: flex;
-  gap: 2rem;
-  margin-top: 2rem;
-  align-items: flex-start;
-  flex-wrap: wrap;
 `;

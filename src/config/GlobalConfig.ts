@@ -7,6 +7,10 @@ export const GlobalConfig = {
 };
 export const wConf = {
   MusicPlayer: {
+    // 在这里填写音频直链；留空时不预设曲目，仍可从 Moments 选择音乐。
+    url: "",
+    title: "随身听",
+    artist: "",
     opacity: 0.7,
     size: 20,
     cover:

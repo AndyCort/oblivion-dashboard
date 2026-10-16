@@ -1,3 +1,4 @@
+import { normalizeMomentsResponse } from "../utils/normalizeMoments";
 import { useState, useEffect, useCallback } from "react";
 import type { Moment } from "../components/data/moments";
 import { moments as localFallbackMoments } from "../components/data/moments";
@@ -29,56 +30,6 @@ function isValidCmsUrl(url?: string): url is string {
 
 const API_URL = isValidCmsUrl(RAW_API_URL) ? RAW_API_URL.trim() : DEFAULT_API_URL;
 
-/**
- * 防御性格式化 CMS 返回的说说数据，确保与 Moment 结构完全一致
- */
-function normalizeMoment(item: Record<string, unknown>): Moment {
-  let media = item.media;
-  if (typeof media === "string") {
-    try {
-      media = JSON.parse(media);
-    } catch {
-      media = [];
-    }
-  }
-
-  let tags = item.tags;
-  if (typeof tags === "string") {
-    try {
-      tags = JSON.parse(tags);
-    } catch {
-      tags = [];
-    }
-  }
-
-  let music = item.music;
-  if (typeof music === "string") {
-    try {
-      music = JSON.parse(music);
-    } catch {
-      music = undefined;
-    }
-  }
-
-  let time = typeof item.time === "number" ? item.time : Number(item.time);
-  if (Number.isNaN(time) || !time) {
-    const parsedDate = typeof item.time === "string" ? new Date(item.time).getTime() : NaN;
-    time = Number.isNaN(parsedDate) ? Date.now() : parsedDate;
-  }
-
-  return {
-    time,
-    content:
-      typeof item.content === "string" || (typeof item.content === "object" && item.content !== null)
-        ? (item.content as Moment["content"])
-        : undefined,
-    media: Array.isArray(media) ? (media as Moment["media"]) : undefined,
-    tags: Array.isArray(tags) ? (tags as string[]) : undefined,
-    location: typeof item.location === "string" ? item.location : undefined,
-    music: music && typeof music === "object" ? (music as Moment["music"]) : undefined,
-  };
-}
-
 async function fetchFromEndpoint(url: string, signal: AbortSignal): Promise<Moment[]> {
   const res = await fetch(url, {
     signal,
@@ -94,20 +45,7 @@ async function fetchFromEndpoint(url: string, signal: AbortSignal): Promise<Mome
     throw new Error(`响应非 JSON 格式 (${contentType})`);
   }
 
-  const json = await res.json();
-  const rawList = Array.isArray(json)
-    ? json
-    : Array.isArray(json?.data)
-      ? json.data
-      : Array.isArray(json?.moments)
-        ? json.moments
-        : null;
-
-  if (!rawList) {
-    throw new Error("CMS API 返回的数据结构未包含合法的说说列表");
-  }
-
-  return (rawList as Record<string, unknown>[]).map(normalizeMoment);
+  return normalizeMomentsResponse(await res.json());
 }
 
 export function useMoments() {
@@ -136,11 +74,8 @@ export function useMoments() {
           setError(null);
         }
       } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          return;
-        }
+        if (!isMounted) return;
         const lastError = err instanceof Error ? err : new Error(String(err));
-        console.warn(`从 ${API_URL} 获取最新说说失败，已回退至本地数据:`, lastError);
         if (isMounted) {
           setError(lastError);
           setMoments(localFallbackMoments);

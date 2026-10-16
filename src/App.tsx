@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { HomePage } from "./pages/HomePage";
 import { NowPage } from "./pages/NowPage";
 import { NotesPage } from "./pages/NotesPage";
@@ -6,15 +6,16 @@ import { LibraryPage } from "./pages/LibraryPage";
 import { SpacePage } from "./pages/SpacePage";
 import { Sun, Moon, ChevronUp, ChevronDown } from "lucide-react";
 import styled, {
-  useTheme,
   ThemeProvider as StyledThemeProvider,
   createGlobalStyle,
   keyframes,
 } from "styled-components";
-import { DotButton } from "./components/ui/DotButton";
+import { DotButton, DotNav } from "./components/ui/DotButton";
 import { GlobalConfig } from "./config/GlobalConfig";
 import { MusicProvider } from "./contexts/MusicContext";
 import { MusicPlayer } from "./components/MusicPlayer";
+import { usePointerActivity } from "./hooks/usePointerActivity";
+import { backgroundImage, themes } from "./config/theme";
 // 标题
 const brand = `${GlobalConfig.siteName.zh} / ${GlobalConfig.siteName.en}`;
 
@@ -23,89 +24,81 @@ type Page = (typeof pagesList)[number];
 
 const GlobalBodyStyle = createGlobalStyle`
   body {
-    color: ${({ theme }: any) => theme.ink};
+    color: ${({ theme }) => theme.ink};
   }
 `;
 
 function App() {
-  const theme = useTheme() as any;
+  const navigationVisible = usePointerActivity();
   const [activePage, setActivePage] = useState<Page>("home");
 
   useEffect(() => {
     document.title = `${GlobalConfig.siteName.zh} - ${activePage}`;
   }, [activePage]);
 
-  const goNextPage = () => {
-    const currentIndex = pagesList.indexOf(activePage);
-    setActivePage(pagesList[(currentIndex + 1) % pagesList.length]);
-  };
-
-  const goPrevPage = () => {
-    const currentIndex = pagesList.indexOf(activePage);
-    setActivePage(
-      pagesList[(currentIndex - 1 + pagesList.length) % pagesList.length],
-    );
-  };
+  const changePage = useCallback((direction: number) => {
+    setActivePage(current => pagesList[(pagesList.indexOf(current) + direction + pagesList.length) % pagesList.length]);
+  }, []);
+  const goNextPage = () => changePage(1);
+  const goPrevPage = () => changePage(-1);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown" || e.key === "ArrowRight") {
-        goNextPage();
-      }
-      if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-        goPrevPage();
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      if (e.target instanceof Element && e.target.closest('input, textarea, select, button, a, video, audio, [contenteditable], [role="slider"]')) return;
+      if (["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(e.key)) {
+        e.preventDefault();
+        changePage(e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : -1);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [activePage]);
+  }, [changePage]);
 
-  const [timeStr, setTimeStr] = useState("");
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setTimeStr(now.toLocaleTimeString([], { hour12: false }));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem("oblivion-theme");
+      if (saved === "dark" || saved === "light") return saved === "dark";
+    } catch { /* Storage may be unavailable in private browsers. */ }
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
   useEffect(() => {
-    document.body.classList.toggle("dark", darkMode);
+    document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
+    try { localStorage.setItem("oblivion-theme", darkMode ? "dark" : "light"); } catch { /* Keep the in-memory preference. */ }
   }, [darkMode]);
 
-  const currentTheme = theme.themes[0];
-  const combinedTheme = {
-    ...currentTheme.colors,
-    fontSizes: theme.fontSizes,
-  };
+  const combinedTheme = themes[darkMode ? "dark" : "light"];
 
   return (
     <>
-      <Background $bg={currentTheme.bgImg} />
+      <Background $bg={backgroundImage} $overlay={combinedTheme.overlay} />
       <AmbientOrb />
 
       <MusicProvider>
         <StyledThemeProvider theme={combinedTheme}>
           <GlobalBodyStyle />
           <Layout>
-            <nav className="nav" aria-label="Page navigation">
+            <DotNav
+              className={navigationVisible ? "is-visible" : ""}
+              $visible={navigationVisible}
+              aria-label="Page navigation"
+            >
               {pagesList.map((page) => (
                 <DotButton
                   key={page}
                   active={activePage === page}
                   onClick={() => setActivePage(page)}
-                  label={page}
-                  labelAlign="right"
+                  ariaLabel={page}
                 />
               ))}
-            </nav>
+            </DotNav>
 
             <header className="top">
               <div className="brand">{brand}</div>
               <div className="top-right">
                 <div className="dark-mode">
-                  <button onClick={() => setDarkMode(!darkMode)}>
+                  <button aria-label={darkMode ? "切换浅色主题" : "切换深色主题"} aria-pressed={darkMode} onClick={() => setDarkMode(value => !value)}>
                     {darkMode ? (
                       <Sun size={16} strokeWidth={1.5} />
                     ) : (
@@ -144,7 +137,7 @@ function App() {
                 <span className="status-dot"></span>
                 <strong>Online</strong>
               </div>
-              <div>{timeStr}</div>
+              <div>{activePage}</div>
             </div>
             
             <MusicPlayer className="global-player" />
@@ -156,11 +149,11 @@ function App() {
   );
 }
 
-const Background = styled.div<{ $bg: string }>`
+const Background = styled.div<{ $bg: string; $overlay: string }>`
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: url(${({ $bg }) => $bg}) center / cover no-repeat;
+  background: linear-gradient(${({ $overlay }) => $overlay}, ${({ $overlay }) => $overlay}), url(${({ $bg }) => $bg}) center / cover no-repeat;
 `;
 
 const breathe = keyframes`
@@ -170,6 +163,17 @@ const breathe = keyframes`
   }
   50% {
     transform: translate(-50%, -50%) scale(1.08);
+  }
+`;
+
+const pulseStatusDot = keyframes`
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 6px #22c55e, 0 0 12px rgba(34, 197, 94, 0.6);
+  }
+  50% {
+    opacity: 0.75;
+    box-shadow: 0 0 3px #22c55e, 0 0 6px rgba(34, 197, 94, 0.35);
   }
 `;
 
@@ -197,33 +201,11 @@ const AmbientOrb = styled.div`
 
 const Layout = styled.div`
   position: relative;
-  width: 100vw;
-  height: 100vh;
-  min-height: 560px;
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
   z-index: 1;
 
-  /* Nav */
-  .nav {
-    position: fixed;
-    z-index: 20;
-    left: 34px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 28px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 19px;
-
-    &::before {
-      content: "";
-      position: absolute;
-      top: 3px;
-      bottom: 3px;
-      width: 1px;
-      background: rgba(40, 37, 42, 0.13);
-    }
-  }
   /* Top Header */
   .top {
     position: absolute;
@@ -250,8 +232,8 @@ const Layout = styled.div`
         align-items: center;
         justify-content: center;
         button {
-          width: 36px;
-          height: 36px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
           background: transparent;
           border: none;
@@ -269,6 +251,7 @@ const Layout = styled.div`
       position: absolute;
       inset: 0;
       padding: 0 8vw 0 10vw;
+      visibility: hidden;
       display: grid;
       place-items: center;
       opacity: 0;
@@ -281,6 +264,7 @@ const Layout = styled.div`
         filter 0.65s ease;
     }
     .page.active {
+      visibility: visible;
       opacity: 1;
       pointer-events: auto;
       transform: translateY(0) scale(1);
@@ -293,8 +277,8 @@ const Layout = styled.div`
     position: fixed;
     left: 50%;
     z-index: 20;
-    width: 48px;
-    height: 48px;
+    width: 120px;
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -302,19 +286,27 @@ const Layout = styled.div`
     background: transparent;
     color: ${({ theme }) => theme.muted};
     cursor: pointer;
-    transition: 0.3s ease;
+    opacity: 0;
     transform: translateX(-50%);
+    transition:
+      opacity 0.3s ease,
+      color 0.3s ease,
+      transform 0.3s ease;
 
-    &:hover {
+    &:hover,
+    &:focus-visible {
+      opacity: 1;
       color: ${({ theme }) => theme.ink};
       transform: translateX(-50%) scale(1.1);
     }
 
     &.prev {
-      top: 24px;
+      top: 0;
+      padding-top: 12px;
     }
     &.next {
-      bottom: 24px;
+      bottom: 0;
+      padding-bottom: 12px;
     }
   }
 
@@ -325,51 +317,33 @@ const Layout = styled.div`
     z-index: 10;
     left: 92px;
     bottom: 34px;
-    right: 56px;
+    right: 92px;
     display: flex;
     justify-content: space-between;
-    align-items: end;
+    align-items: center;
     color: ${({ theme }) => theme.muted};
     font-size: 9px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
+
+    > div {
+      display: inline-flex;
+      align-items: center;
+    }
   }
   .status-dot {
     display: inline-block;
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: rgba(40, 37, 42, 0.5);
+    background: #22c55e;
+    box-shadow: 0 0 6px #22c55e, 0 0 12px rgba(34, 197, 94, 0.6);
     margin-right: 7px;
-  }
-
-  .global-player {
-    position: fixed;
-    z-index: 50;
-    right: 30px;
-    bottom: 30px;
-    width: 280px;
-    padding: 16px;
-    border-radius: 16px;
-    background: rgba(0, 0, 0, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    color: #fff;
-    transform: scale(0.9);
-    transform-origin: bottom right;
-    transition: 0.3s ease;
-
-    &:hover {
-      transform: scale(1);
-    }
+    flex-shrink: 0;
+    animation: ${pulseStatusDot} 2.5s ease-in-out infinite;
   }
 
   @media (max-width: 720px) {
-    .nav {
-      left: 18px;
-    }
     .top {
       left: 58px;
       right: 22px;
@@ -377,16 +351,10 @@ const Layout = styled.div`
     }
     .bottom-status {
       left: 58px;
-      right: 22px;
-      bottom: 20px;
+      right: 58px;
+      bottom: max(20px, env(safe-area-inset-bottom));
     }
-    .global-player {
-      width: calc(100vw - 40px);
-      right: 20px;
-      bottom: 80px;
-      transform: scale(1);
-    }
-    .page {
+    .pages .page {
       padding: 80px 7vw 80px 12vw;
     }
   }

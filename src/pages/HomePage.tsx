@@ -55,7 +55,7 @@ export function HomePage({ isActive }: Props) {
             : "Good night";
 
   return (
-    <section className={`page ${isActive ? "active" : ""}`} id="home">
+    <section className={`page ${isActive ? "active" : ""}`} id="home" inert={!isActive} aria-hidden={!isActive}>
       <HomeContent>
         <div className="eyebrow">{greeting}</div>
         <div className="clock" id="clock">
@@ -78,7 +78,7 @@ export function HomePage({ isActive }: Props) {
 }
 
 const HomeContent = styled.div`
-  width: min(1000px, 82vw);
+  width: min(1000px, 100%);
   position: relative;
   margin-top: 1vh;
 
@@ -124,7 +124,9 @@ const HomeContent = styled.div`
 
     @media (max-width: 720px) {
       position: relative;
-      margin-top: 40px;
+      width: 100%;
+      max-width: 36rem;
+      margin-top: 32px;
       right: auto;
       bottom: auto;
     }
