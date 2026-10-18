@@ -121,11 +121,19 @@ const HomeContent = styled.div`
     right: 0;
     bottom: 4px;
     width: 30vw;
-    font-family: "EB Garamond", Georgia, serif;
-    font-style: italic;
-    font-size: 18px;
+    font-family: "Ballet", Georgia, serif;
+    font-size: 48px;
     line-height: 1.55;
 
+    small {
+      display: block;
+      margin-top: 12px;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: ${({ theme }) => theme.muted};
+    }
     @media (max-width: 720px) {
       position: relative;
       width: 100%;
@@ -134,14 +142,5 @@ const HomeContent = styled.div`
       right: auto;
       bottom: auto;
     }
-  }
-  .quote small {
-    display: block;
-    margin-top: 12px;
-    font-family: "DM Sans", system-ui, sans-serif;
-    font-size: 9px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: ${({ theme }) => theme.muted};
   }
 `;
