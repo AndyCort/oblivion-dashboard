@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type ComponentType } from "react";
 import { HomePage } from "./pages/HomePage";
 import { NowPage } from "./pages/NowPage";
+import { NavPage } from "./pages/NavPage";
 import { NotesPage } from "./pages/NotesPage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { SpacePage } from "./pages/SpacePage";
@@ -19,8 +20,17 @@ import { backgroundImage, themes } from "./config/theme";
 // 标题
 const brand = `${GlobalConfig.siteName.zh} / ${GlobalConfig.siteName.en}`;
 
-const pagesList = ["home", "now", "notes", "library", "moments"] as const;
-type Page = (typeof pagesList)[number];
+// 页面配置表（顺序即切换顺序）
+const PAGES = [
+  { id: "home", Component: HomePage },
+  { id: "now", Component: NowPage },
+  { id: "nav", Component: NavPage },
+  { id: "notes", Component: NotesPage },
+  { id: "library", Component: LibraryPage },
+  { id: "moments", Component: SpacePage },
+] as const satisfies readonly { id: string; Component: ComponentType<{ isActive: boolean }> }[];
+
+type Page = (typeof PAGES)[number]["id"];
 
 const GlobalBodyStyle = createGlobalStyle`
   body {
@@ -37,15 +47,33 @@ function App() {
   }, [activePage]);
 
   const changePage = useCallback((direction: number) => {
-    setActivePage(current => pagesList[(pagesList.indexOf(current) + direction + pagesList.length) % pagesList.length]);
+    setActivePage((current) => {
+      const currentIndex = PAGES.findIndex((p) => p.id === current);
+      const nextIndex =
+        (currentIndex + direction + PAGES.length) % PAGES.length;
+      return PAGES[nextIndex].id;
+    });
   }, []);
   const goNextPage = () => changePage(1);
   const goPrevPage = () => changePage(-1);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      if (e.target instanceof Element && e.target.closest('input, textarea, select, button, a, video, audio, [contenteditable], [role="slider"]')) return;
+      if (
+        e.defaultPrevented ||
+        e.altKey ||
+        e.ctrlKey ||
+        e.metaKey ||
+        e.shiftKey
+      )
+        return;
+      if (
+        e.target instanceof Element &&
+        e.target.closest(
+          'input, textarea, select, button, a, video, audio, [contenteditable], [role="slider"]',
+        )
+      )
+        return;
       if (["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(e.key)) {
         e.preventDefault();
         changePage(e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : -1);
@@ -55,17 +83,22 @@ function App() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [changePage]);
 
-
   const [darkMode, setDarkMode] = useState(() => {
     try {
       const saved = localStorage.getItem("oblivion-theme");
       if (saved === "dark" || saved === "light") return saved === "dark";
-    } catch { /* Storage may be unavailable in private browsers. */ }
+    } catch {
+      /* Storage may be unavailable in private browsers. */
+    }
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
   useEffect(() => {
     document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
-    try { localStorage.setItem("oblivion-theme", darkMode ? "dark" : "light"); } catch { /* Keep the in-memory preference. */ }
+    try {
+      localStorage.setItem("oblivion-theme", darkMode ? "dark" : "light");
+    } catch {
+      /* Keep the in-memory preference. */
+    }
   }, [darkMode]);
 
   const combinedTheme = themes[darkMode ? "dark" : "light"];
@@ -84,12 +117,12 @@ function App() {
               $visible={navigationVisible}
               aria-label="Page navigation"
             >
-              {pagesList.map((page) => (
+              {PAGES.map(({ id }) => (
                 <DotButton
-                  key={page}
-                  active={activePage === page}
-                  onClick={() => setActivePage(page)}
-                  ariaLabel={page}
+                  key={id}
+                  active={activePage === id}
+                  onClick={() => setActivePage(id)}
+                  ariaLabel={id}
                 />
               ))}
             </DotNav>
@@ -98,7 +131,11 @@ function App() {
               <div className="brand">{brand}</div>
               <div className="top-right">
                 <div className="dark-mode">
-                  <button aria-label={darkMode ? "切换浅色主题" : "切换深色主题"} aria-pressed={darkMode} onClick={() => setDarkMode(value => !value)}>
+                  <button
+                    aria-label={darkMode ? "切换浅色主题" : "切换深色主题"}
+                    aria-pressed={darkMode}
+                    onClick={() => setDarkMode((value) => !value)}
+                  >
                     {darkMode ? (
                       <Sun size={16} strokeWidth={1.5} />
                     ) : (
@@ -110,11 +147,9 @@ function App() {
             </header>
 
             <main className="pages">
-              <HomePage isActive={activePage === "home"} />
-              <NowPage isActive={activePage === "now"} />
-              <NotesPage isActive={activePage === "notes"} />
-              <LibraryPage isActive={activePage === "library"} />
-              <SpacePage isActive={activePage === "moments"} />
+              {PAGES.map(({ id, Component }) => (
+                <Component key={id} isActive={activePage === id} />
+              ))}
             </main>
 
             <button
@@ -139,9 +174,8 @@ function App() {
               </div>
               <div>{activePage}</div>
             </div>
-            
-            <MusicPlayer className="global-player" />
 
+            <MusicPlayer className="global-player" />
           </Layout>
         </StyledThemeProvider>
       </MusicProvider>
@@ -153,7 +187,12 @@ const Background = styled.div<{ $bg: string; $overlay: string }>`
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(${({ $overlay }) => $overlay}, ${({ $overlay }) => $overlay}), url(${({ $bg }) => $bg}) center / cover no-repeat;
+  background:
+    linear-gradient(
+      ${({ $overlay }) => $overlay},
+      ${({ $overlay }) => $overlay}
+    ),
+    url(${({ $bg }) => $bg}) center / cover no-repeat;
 `;
 
 const breathe = keyframes`
@@ -337,7 +376,9 @@ const Layout = styled.div`
     height: 6px;
     border-radius: 50%;
     background: #22c55e;
-    box-shadow: 0 0 6px #22c55e, 0 0 12px rgba(34, 197, 94, 0.6);
+    box-shadow:
+      0 0 6px #22c55e,
+      0 0 12px rgba(34, 197, 94, 0.6);
     margin-right: 7px;
     flex-shrink: 0;
     animation: ${pulseStatusDot} 2.5s ease-in-out infinite;

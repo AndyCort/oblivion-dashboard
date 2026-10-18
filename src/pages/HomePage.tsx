@@ -28,9 +28,8 @@ const months = [
   "November",
   "December",
 ];
-const Quote =
-  'childhood trauma doesn\'t "build character" it destroys you before you are even able to start growing';
-const Author = "Anonymous";
+const Quote = "Be your own happiness.";
+const Author = "Anlyn";
 export function HomePage({ isActive }: Props) {
   const [time, setTime] = useState(new Date());
 
@@ -55,7 +54,12 @@ export function HomePage({ isActive }: Props) {
             : "Good night";
 
   return (
-    <section className={`page ${isActive ? "active" : ""}`} id="home" inert={!isActive} aria-hidden={!isActive}>
+    <section
+      className={`page ${isActive ? "active" : ""}`}
+      id="home"
+      inert={!isActive}
+      aria-hidden={!isActive}
+    >
       <HomeContent>
         <div className="eyebrow">{greeting}</div>
         <div className="clock" id="clock">
