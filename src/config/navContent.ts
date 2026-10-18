@@ -24,10 +24,10 @@ export const navContent = {
       category: "Develop",
     },
     {
-      name: "Article",
-      url: "/article",
-      description: "长文与深度阅读",
-      category: "Read",
+      name: "Codex",
+      url: "https://codex-resets.com/zh-CN",
+      description: "Codex重置推送",
+      category: "Codex",
     },
     {
       name: "Thoughts",
